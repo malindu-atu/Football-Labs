@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getSessions, getKidsByAgeGroup, markAttendance } from "../api";
+import { pageWrapper, card } from "../components/UI";
 
 export default function Attendance() {
   const [sessions, setSessions] = useState([]);
@@ -25,85 +26,118 @@ export default function Attendance() {
     setSubmitting(true);
     const records = kids.map(k => ({ kid_id: k.id, status: attendance[k.id] }));
     await markAttendance({ session_id: selectedSession.id, records });
-    alert("✅ Attendance marked successfully!");
+    alert("✅ Attendance marked!");
     setSelectedSession(null);
     getSessions().then(r => setSessions(r.data.filter(s => s.status === "scheduled")));
     setSubmitting(false);
   };
 
-  const statusColor = (s) => {
-    if (s === "present") return "bg-green-100 text-green-700";
-    if (s === "late") return "bg-yellow-100 text-yellow-700";
-    return "bg-red-100 text-red-700";
+  const statusStyle = (s) => {
+    if (s === "present") return { backgroundColor: "rgba(0,229,204,0.1)", color: "#00E5CC" };
+    if (s === "late") return { backgroundColor: "rgba(251,191,36,0.1)", color: "#FCD34D" };
+    return { backgroundColor: "rgba(239,68,68,0.1)", color: "#F87171" };
   };
 
+  const present = Object.values(attendance).filter(v => v === "present").length;
+  const absent = Object.values(attendance).filter(v => v === "absent").length;
+  const late = Object.values(attendance).filter(v => v === "late").length;
+
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      <h1 className="text-2xl font-bold text-green-700 mb-6">Mark Attendance</h1>
+    <div style={pageWrapper} className="p-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-white">Attendance</h1>
+        <p className="text-gray-400 mt-1">Mark attendance for scheduled sessions</p>
+      </div>
 
       {!selectedSession ? (
         <>
-          <p className="text-gray-500 mb-4">Select a session to mark attendance for:</p>
-          {sessions.length === 0 && (
-            <div className="bg-white rounded-xl shadow p-8 text-center text-gray-400">
-              No scheduled sessions found.
+          {sessions.length === 0 ? (
+            <div style={card} className="rounded-2xl p-12 text-center">
+              <p className="text-4xl mb-3">📅</p>
+              <p className="text-white font-semibold">No scheduled sessions</p>
+              <p className="text-gray-400 text-sm mt-1">All sessions have been completed or there are none scheduled.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-4">
+              {sessions.map(s => (
+                <div key={s.id} onClick={() => handleSessionSelect(s)}
+                  style={{ ...card, cursor: "pointer" }}
+                  className="rounded-2xl p-6 hover:border-cyan-500/40 transition-all group">
+                  <div className="flex items-start justify-between mb-3">
+                    <span style={{ backgroundColor: "rgba(0,229,204,0.1)", color: "#00E5CC" }}
+                      className="px-2 py-0.5 rounded-full text-xs font-bold">{s.age_group}</span>
+                    <span style={{ color: "#FCD34D", backgroundColor: "rgba(251,191,36,0.1)" }}
+                      className="text-xs px-2 py-0.5 rounded-full">Scheduled</span>
+                  </div>
+                  <p className="text-white font-semibold mb-1">{s.date}</p>
+                  <p className="text-gray-400 text-sm">⏰ {s.start_time} – {s.end_time}</p>
+                  <p className="text-gray-400 text-sm mt-1">🧑‍🏫 {s.coaches?.name || "No coach"}</p>
+                  <p className="text-gray-400 text-sm">📍 {s.locations?.name || "—"}</p>
+                  <div style={{ color: "#00E5CC" }} className="text-xs mt-3 opacity-0 group-hover:opacity-100 transition-all">
+                    Click to mark attendance →
+                  </div>
+                </div>
+              ))}
             </div>
           )}
-          <div className="grid grid-cols-3 gap-4">
-            {sessions.map(s => (
-              <div key={s.id} onClick={() => handleSessionSelect(s)}
-                className="bg-white rounded-xl shadow p-6 cursor-pointer hover:shadow-md hover:border-2 hover:border-green-500 transition-all">
-                <p className="font-bold text-green-700 text-lg">{s.age_group}</p>
-                <p className="text-gray-600 text-sm mt-1">📅 {s.date}</p>
-                <p className="text-gray-600 text-sm">⏰ {s.start_time} – {s.end_time}</p>
-                <p className="text-gray-500 text-sm mt-2">🧑‍🏫 {s.coaches?.name || "No coach assigned"}</p>
-                <p className="text-gray-500 text-sm">📍 {s.locations?.name || "—"}</p>
+        </>
+      ) : (
+        <div style={card} className="rounded-2xl overflow-hidden">
+          <div style={{ backgroundColor: "#0A1628", borderBottom: "1px solid rgba(255,255,255,0.05)" }}
+            className="p-5 flex items-center justify-between">
+            <div>
+              <h2 className="font-semibold text-white">{selectedSession.age_group} — {selectedSession.date}</h2>
+              <p className="text-gray-400 text-sm">{selectedSession.start_time} – {selectedSession.end_time}</p>
+            </div>
+            <button onClick={() => setSelectedSession(null)}
+              style={{ border: "1px solid rgba(255,255,255,0.1)", color: "#9CA3AF" }}
+              className="px-4 py-1.5 rounded-lg text-sm hover:bg-white/5 transition-all">
+              ← Back
+            </button>
+          </div>
+
+          {/* Summary */}
+          <div className="p-4 flex gap-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+            {[
+              { label: "Present", count: present, color: "#00E5CC", bg: "rgba(0,229,204,0.1)" },
+              { label: "Absent", count: absent, color: "#F87171", bg: "rgba(239,68,68,0.1)" },
+              { label: "Late", count: late, color: "#FCD34D", bg: "rgba(251,191,36,0.1)" },
+            ].map(s => (
+              <div key={s.label} style={{ backgroundColor: s.bg }} className="px-4 py-2 rounded-lg flex items-center gap-2">
+                <span style={{ color: s.color }} className="font-bold">{s.count}</span>
+                <span style={{ color: s.color }} className="text-sm">{s.label}</span>
               </div>
             ))}
           </div>
-        </>
-      ) : (
-        <div className="bg-white rounded-xl shadow p-6">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h2 className="font-semibold text-lg">{selectedSession.age_group} — {selectedSession.date}</h2>
-              <p className="text-gray-500 text-sm">{selectedSession.start_time} – {selectedSession.end_time}</p>
-            </div>
-            <button onClick={() => setSelectedSession(null)}
-              className="text-gray-500 hover:underline text-sm">← Back to sessions</button>
-          </div>
 
-          <div className="mb-4 flex gap-2 text-xs">
-            <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full">
-              Present: {Object.values(attendance).filter(v => v === "present").length}
-            </span>
-            <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full">
-              Absent: {Object.values(attendance).filter(v => v === "absent").length}
-            </span>
-            <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full">
-              Late: {Object.values(attendance).filter(v => v === "late").length}
-            </span>
-          </div>
-
-          <table className="w-full mb-6">
-            <thead className="bg-green-50">
+          <table className="w-full">
+            <thead style={{ backgroundColor: "#0A1628" }}>
               <tr>
-                <th className="p-3 text-left text-sm font-semibold text-gray-600">Kid</th>
-                <th className="p-3 text-left text-sm font-semibold text-gray-600">Status</th>
+                <th className="p-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Student</th>
+                <th className="p-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
               </tr>
             </thead>
             <tbody>
               {kids.map(k => (
-                <tr key={k.id} className="border-t hover:bg-gray-50">
-                  <td className="p-3 text-sm font-medium">{k.name}</td>
-                  <td className="p-3">
+                <tr key={k.id} style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                  <td className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div style={{ backgroundColor: "rgba(0,229,204,0.1)", color: "#00E5CC" }}
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
+                        {k.name.charAt(0)}
+                      </div>
+                      <span className="text-white text-sm">{k.name}</span>
+                    </div>
+                  </td>
+                  <td className="p-4">
                     <select
-                      className={`border rounded p-1 text-sm ${statusColor(attendance[k.id])}`}
+                      style={{ ...statusStyle(attendance[k.id]), border: "none", outline: "none", cursor: "pointer" }}
+                      className="px-3 py-1.5 rounded-lg text-sm font-medium"
                       value={attendance[k.id]}
                       onChange={e => setAttendance({...attendance, [k.id]: e.target.value})}>
-                      <option value="present">Present</option>
-                      <option value="absent">Absent</option>
-                      <option value="late">Late</option>
+                      <option value="present" style={{ backgroundColor: "#0D1F3C", color: "white" }}>Present</option>
+                      <option value="absent" style={{ backgroundColor: "#0D1F3C", color: "white" }}>Absent</option>
+                      <option value="late" style={{ backgroundColor: "#0D1F3C", color: "white" }}>Late</option>
                     </select>
                   </td>
                 </tr>
@@ -111,10 +145,13 @@ export default function Attendance() {
             </tbody>
           </table>
 
-          <button onClick={handleSubmit} disabled={submitting}
-            className="bg-green-600 text-white px-8 py-2 rounded hover:bg-green-700 disabled:opacity-50">
-            {submitting ? "Submitting..." : "Submit Attendance"}
-          </button>
+          <div className="p-5" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+            <button onClick={handleSubmit} disabled={submitting}
+              style={{ backgroundColor: "#00E5CC", color: "#0A1628" }}
+              className="px-8 py-2.5 rounded-lg font-bold text-sm hover:opacity-90 disabled:opacity-50 transition-all">
+              {submitting ? "Submitting..." : "Submit Attendance ✓"}
+            </button>
+          </div>
         </div>
       )}
     </div>

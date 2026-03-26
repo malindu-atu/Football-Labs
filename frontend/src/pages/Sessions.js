@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getSessions, createSession, getCoaches } from "../api";
+import { pageWrapper, card, input, btnPrimary } from "../components/UI";
 
 const AGE_GROUPS = ["U6","U7","U8","U9","U10","U11","U12","U13","U14","U15","U16"];
 
@@ -23,80 +24,109 @@ export default function Sessions() {
     setForm({ date: "", start_time: "", end_time: "", location_id: "", age_group: "U6", coach_id: "" });
   };
 
-  const statusColor = (s) => {
-    if (s === "completed") return "bg-green-100 text-green-700";
-    if (s === "cancelled") return "bg-red-100 text-red-700";
-    return "bg-yellow-100 text-yellow-700";
+  const statusStyle = (s) => {
+    if (s === "completed") return { backgroundColor: "rgba(0,229,204,0.1)", color: "#00E5CC" };
+    if (s === "cancelled") return { backgroundColor: "rgba(239,68,68,0.1)", color: "#F87171" };
+    return { backgroundColor: "rgba(251,191,36,0.1)", color: "#FCD34D" };
+  };
+
+  const selectStyle = {
+    ...input,
+    backgroundImage: "none"
   };
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      <h1 className="text-2xl font-bold text-green-700 mb-6">Sessions</h1>
+    <div style={pageWrapper} className="p-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-white">Sessions</h1>
+        <p className="text-gray-400 mt-1">Schedule and manage training sessions</p>
+      </div>
 
-      <div className="bg-white rounded-xl shadow p-6 mb-8">
-        <h2 className="font-semibold mb-4 text-gray-700">Create Session</h2>
+      <div style={card} className="rounded-2xl p-6 mb-6">
+        <h2 className="font-semibold text-white mb-4">Create Session</h2>
         <form onSubmit={handleSubmit} className="grid grid-cols-3 gap-4">
+          {[
+            { label: "Date", key: "date", type: "date" },
+            { label: "Start Time", key: "start_time", type: "time" },
+            { label: "End Time", key: "end_time", type: "time" },
+            { label: "Location ID", key: "location_id", type: "text", placeholder: "Paste location UUID" },
+          ].map(f => (
+            <div key={f.key}>
+              <label className="text-xs text-gray-400 mb-1.5 block">{f.label}</label>
+              <input style={input}
+                className="w-full rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
+                type={f.type} placeholder={f.placeholder || ""}
+                value={form[f.key]}
+                onChange={e => setForm({...form, [f.key]: e.target.value})}
+                required={f.key !== "coach_id"} />
+            </div>
+          ))}
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">Date</label>
-            <input className="border rounded p-2 w-full text-sm" type="date"
-              value={form.date} onChange={e => setForm({...form, date: e.target.value})} required />
-          </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">Start Time</label>
-            <input className="border rounded p-2 w-full text-sm" type="time"
-              value={form.start_time} onChange={e => setForm({...form, start_time: e.target.value})} required />
-          </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">End Time</label>
-            <input className="border rounded p-2 w-full text-sm" type="time"
-              value={form.end_time} onChange={e => setForm({...form, end_time: e.target.value})} required />
-          </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">Location ID</label>
-            <input className="border rounded p-2 w-full text-sm" placeholder="Paste location UUID"
-              value={form.location_id} onChange={e => setForm({...form, location_id: e.target.value})} required />
-          </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">Age Group</label>
-            <select className="border rounded p-2 w-full text-sm"
-              value={form.age_group} onChange={e => setForm({...form, age_group: e.target.value})}>
-              {AGE_GROUPS.map(g => <option key={g}>{g}</option>)}
+            <label className="text-xs text-gray-400 mb-1.5 block">Age Group</label>
+            <select style={selectStyle}
+              className="w-full rounded-lg p-3 text-sm focus:outline-none"
+              value={form.age_group}
+              onChange={e => setForm({...form, age_group: e.target.value})}>
+              {AGE_GROUPS.map(g => <option key={g} style={{ backgroundColor: "#0D1F3C" }}>{g}</option>)}
             </select>
           </div>
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">Assign Coach</label>
-            <select className="border rounded p-2 w-full text-sm"
-              value={form.coach_id} onChange={e => setForm({...form, coach_id: e.target.value})}>
-              <option value="">No coach yet</option>
-              {coaches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            <label className="text-xs text-gray-400 mb-1.5 block">Assign Coach</label>
+            <select style={selectStyle}
+              className="w-full rounded-lg p-3 text-sm focus:outline-none"
+              value={form.coach_id}
+              onChange={e => setForm({...form, coach_id: e.target.value})}>
+              <option value="" style={{ backgroundColor: "#0D1F3C" }}>No coach yet</option>
+              {coaches.map(c => <option key={c.id} value={c.id} style={{ backgroundColor: "#0D1F3C" }}>{c.name}</option>)}
             </select>
           </div>
-          <button className="col-span-3 bg-green-600 text-white py-2 rounded hover:bg-green-700 text-sm" type="submit">
-            Create Session
-          </button>
+          <div className="col-span-3">
+            <button style={btnPrimary}
+              className="px-6 py-2.5 rounded-lg font-semibold text-sm hover:opacity-90 transition-all"
+              type="submit">
+              + Create Session
+            </button>
+          </div>
         </form>
       </div>
 
-      <div className="bg-white rounded-xl shadow overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-green-50">
-            <tr>{["Date","Time","Age Group","Location","Coach","Status"].map(h => (
-              <th key={h} className="p-4 text-left text-sm font-semibold text-gray-600">{h}</th>
-            ))}</tr>
-          </thead>
-          <tbody>
-            {sessions.map(s => (
-              <tr key={s.id} className="border-t hover:bg-gray-50">
-                <td className="p-4 text-sm">{s.date}</td>
-                <td className="p-4 text-sm">{s.start_time} – {s.end_time}</td>
-                <td className="p-4"><span className="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">{s.age_group}</span></td>
-                <td className="p-4 text-sm">{s.locations?.name || "—"}</td>
-                <td className="p-4 text-sm">{s.coaches?.name || <span className="text-red-400">Unassigned</span>}</td>
-                <td className="p-4"><span className={`px-2 py-1 rounded-full text-xs ${statusColor(s.status)}`}>{s.status}</span></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div style={card} className="rounded-2xl overflow-hidden">
+        <div className="p-4 border-b border-white/5">
+          <h2 className="font-semibold text-white">All Sessions ({sessions.length})</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead style={{ backgroundColor: "#0A1628" }}>
+              <tr>{["Date","Time","Age Group","Location","Coach","Status"].map(h => (
+                <th key={h} className="p-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">{h}</th>
+              ))}</tr>
+            </thead>
+            <tbody>
+              {sessions.map(s => (
+                <tr key={s.id} style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
+                  className="hover:bg-white/2 transition-colors">
+                  <td className="p-4 text-white text-sm">{s.date}</td>
+                  <td className="p-4 text-gray-400 text-sm">{s.start_time} – {s.end_time}</td>
+                  <td className="p-4">
+                    <span style={{ backgroundColor: "rgba(0,229,204,0.1)", color: "#00E5CC" }}
+                      className="px-2 py-0.5 rounded-full text-xs">{s.age_group}</span>
+                  </td>
+                  <td className="p-4 text-gray-400 text-sm">{s.locations?.name || "—"}</td>
+                  <td className="p-4 text-sm">
+                    {s.coaches?.name
+                      ? <span className="text-white">{s.coaches.name}</span>
+                      : <span style={{ color: "#F87171" }}>Unassigned</span>}
+                  </td>
+                  <td className="p-4">
+                    <span style={statusStyle(s.status)} className="px-2 py-1 rounded-full text-xs capitalize">
+                      {s.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

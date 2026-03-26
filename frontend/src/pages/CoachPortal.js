@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getNotifications, markNotificationRead, addAvailability } from "../api";
 import { useAuth } from "../context/AuthContext";
+import { pageWrapper, card, input, btnPrimary } from "../components/UI";
 
 export default function CoachPortal() {
   const { user } = useAuth();
@@ -30,73 +31,96 @@ export default function CoachPortal() {
   const unread = notifications.filter(n => !n.is_read).length;
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-green-700">Welcome, {user?.coach?.name} 👋</h1>
-        <p className="text-gray-500">Age groups: {user?.coach?.age_groups?.join(", ")}</p>
+    <div style={pageWrapper} className="p-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-white">
+          Welcome, <span style={{ color: "#00E5CC" }}>{user?.coach?.name}</span> 👋
+        </h1>
+        <p className="text-gray-400 mt-1">Age groups: {user?.coach?.age_groups?.join(", ")}</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-2 gap-6">
         {/* Availability */}
-        <div className="bg-white rounded-xl shadow p-6">
-          <h2 className="font-semibold mb-4 text-gray-700">📅 Submit Availability</h2>
+        <div style={card} className="rounded-2xl p-6">
+          <div className="flex items-center gap-2 mb-5">
+            <span className="text-xl">📅</span>
+            <h2 className="font-semibold text-white">Submit Availability</h2>
+          </div>
+
           {submitted && (
-            <div className="bg-green-50 border border-green-200 text-green-700 rounded p-3 mb-4 text-sm">
-              ✅ Availability submitted successfully!
+            <div style={{ backgroundColor: "rgba(0,229,204,0.1)", border: "1px solid rgba(0,229,204,0.3)" }}
+              className="rounded-lg p-3 mb-4 text-sm" style2={{ color: "#00E5CC" }}>
+              <span style={{ color: "#00E5CC" }}>✅ Availability submitted successfully!</span>
             </div>
           )}
-          <form onSubmit={handleAvailability} className="space-y-3">
-            <div>
-              <label className="text-xs text-gray-500 mb-1 block">Date</label>
-              <input className="w-full border rounded p-2 text-sm" type="date"
-                value={form.date} onChange={e => setForm({...form, date: e.target.value})} required />
-            </div>
-            <div>
-              <label className="text-xs text-gray-500 mb-1 block">Start Time</label>
-              <input className="w-full border rounded p-2 text-sm" type="time"
-                value={form.start_time} onChange={e => setForm({...form, start_time: e.target.value})} required />
-            </div>
-            <div>
-              <label className="text-xs text-gray-500 mb-1 block">End Time</label>
-              <input className="w-full border rounded p-2 text-sm" type="time"
-                value={form.end_time} onChange={e => setForm({...form, end_time: e.target.value})} required />
-            </div>
-            <button className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 text-sm" type="submit">
+
+          <form onSubmit={handleAvailability} className="space-y-4">
+            {[
+              { label: "Date", key: "date", type: "date" },
+              { label: "Start Time", key: "start_time", type: "time" },
+              { label: "End Time", key: "end_time", type: "time" },
+            ].map(f => (
+              <div key={f.key}>
+                <label className="text-xs text-gray-400 mb-1.5 block">{f.label}</label>
+                <input style={input}
+                  className="w-full rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
+                  type={f.type} value={form[f.key]}
+                  onChange={e => setForm({...form, [f.key]: e.target.value})} required />
+              </div>
+            ))}
+            <button style={btnPrimary}
+              className="w-full py-3 rounded-lg font-bold text-sm hover:opacity-90 transition-all"
+              type="submit">
               Submit Availability
             </button>
           </form>
         </div>
 
         {/* Notifications */}
-        <div className="bg-white rounded-xl shadow p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-gray-700">🔔 Notifications</h2>
+        <div style={card} className="rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🔔</span>
+              <h2 className="font-semibold text-white">Notifications</h2>
+            </div>
             {unread > 0 && (
-              <span className="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full">{unread} new</span>
+              <span style={{ backgroundColor: "#00E5CC", color: "#0A1628" }}
+                className="text-xs px-2 py-0.5 rounded-full font-bold">
+                {unread} new
+              </span>
             )}
           </div>
-          {notifications.length === 0 && (
-            <p className="text-gray-400 text-sm text-center py-8">No notifications yet</p>
-          )}
-          <div className="space-y-2">
-            {notifications.map(n => (
-              <div key={n.id}
-                className={`p-3 rounded-lg ${n.is_read ? "bg-gray-50" : "bg-green-50 border-l-4 border-green-500"}`}>
-                <p className="text-sm">{n.message}</p>
-                <div className="flex justify-between items-center mt-1">
-                  <span className="text-xs text-gray-400">
-                    {new Date(n.created_at).toLocaleDateString()}
-                  </span>
-                  {!n.is_read && (
-                    <button onClick={() => handleRead(n.id)}
-                      className="text-xs text-green-600 hover:underline">
-                      Mark as read
-                    </button>
-                  )}
+
+          {notifications.length === 0 ? (
+            <div style={{ backgroundColor: "#0A1628" }} className="rounded-xl p-8 text-center">
+              <p className="text-3xl mb-2">🔕</p>
+              <p className="text-gray-500 text-sm">No notifications yet</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {notifications.map(n => (
+                <div key={n.id}
+                  style={n.is_read
+                    ? { backgroundColor: "#0A1628", border: "1px solid rgba(255,255,255,0.05)" }
+                    : { backgroundColor: "rgba(0,229,204,0.05)", border: "1px solid rgba(0,229,204,0.2)", borderLeft: "3px solid #00E5CC" }}
+                  className="rounded-lg p-3">
+                  <p className="text-sm text-white">{n.message}</p>
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-xs text-gray-500">
+                      {new Date(n.created_at).toLocaleDateString()}
+                    </span>
+                    {!n.is_read && (
+                      <button onClick={() => handleRead(n.id)}
+                        style={{ color: "#00E5CC" }}
+                        className="text-xs hover:underline">
+                        Mark as read
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
