@@ -43,3 +43,5 @@ export const getOverviewAnalytics = () => api.get("/analytics/overview");
 export const getCoachAnalytics = (id) => api.get(`/analytics/coach/${id}`);
 export const getStudentAnalytics = (id) => api.get(`/analytics/student/${id}`);
 export const getAgeGroupAnalytics = () => api.get("/analytics/age-group");
+export const getLocationAnalytics = () => api.get("/analytics/location");
+export const getRetentionAnalytics = () => api.get("/analytics/retention");
