@@ -1,25 +1,61 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import Login from "./pages/Login";
+import AdminDashboard from "./pages/AdminDashboard";
+import Coaches from "./pages/Coaches";
+import Sessions from "./pages/Sessions";
+import Kids from "./pages/Kids";
+import Attendance from "./pages/Attendance";
+import Analytics from "./pages/Analytics";
+import CoachPortal from "./pages/CoachPortal";
+import Navbar from "./components/Navbar";
 
-function App() {
+function PrivateRoute({ children, role }) {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" />;
+  if (role && user.role !== role) return <Navigate to="/" />;
+  return children;
+}
+
+function AppRoutes() {
+  const { user } = useAuth();
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      {user && <Navbar />}
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={
+          <PrivateRoute><AdminDashboard /></PrivateRoute>
+        } />
+        <Route path="/coaches" element={
+          <PrivateRoute role="admin"><Coaches /></PrivateRoute>
+        } />
+        <Route path="/sessions" element={
+          <PrivateRoute role="admin"><Sessions /></PrivateRoute>
+        } />
+        <Route path="/kids" element={
+          <PrivateRoute role="admin"><Kids /></PrivateRoute>
+        } />
+        <Route path="/attendance" element={
+          <PrivateRoute><Attendance /></PrivateRoute>
+        } />
+        <Route path="/analytics" element={
+          <PrivateRoute><Analytics /></PrivateRoute>
+        } />
+        <Route path="/coach-portal" element={
+          <PrivateRoute role="coach"><CoachPortal /></PrivateRoute>
+        } />
+      </Routes>
+    </>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}
