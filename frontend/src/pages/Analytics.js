@@ -66,6 +66,19 @@ function PlayerAnalytics({ kids }) {
   const [selectedId, setSelectedId] = useState("");
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
+  const [ageFilter, setAgeFilter] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const AGE_GROUPS = ["U7", "U10", "U13", "U16"];
+
+  const filtered = kids.filter(k => {
+    const matchesSearch = k.name.toLowerCase().includes(search.toLowerCase());
+    const matchesAge = ageFilter ? k.age_group === ageFilter : true;
+    return matchesSearch && matchesAge;
+  });
+
+  const selectedPlayer = kids.find(k => k.id === selectedId);
 
   const load = async (id) => {
     if (!id) return setStats(null);
@@ -77,25 +90,109 @@ function PlayerAnalytics({ kids }) {
     setLoading(false);
   };
 
+  const selectPlayer = (k) => {
+    setSelectedId(k.id);
+    setSearch(k.name);
+    setShowDropdown(false);
+    load(k.id);
+  };
+
+  const clearSelection = () => {
+    setSelectedId("");
+    setSearch("");
+    setStats(null);
+    setShowDropdown(false);
+  };
+
   const rateColor = (r) => r >= 80 ? "#00E5CC" : r >= 50 ? "#FCD34D" : "#F87171";
 
   return (
     <div>
       <SectionHeader icon="👦" title="Player Analytics"
-        subtitle="Select a player to see their full attendance breakdown and trends" />
-      <div className="mb-6">
-        <select style={{ ...input, backgroundImage: "none" }}
-          className="w-full max-w-sm rounded-lg p-3 text-sm focus:outline-none"
-          value={selectedId}
-          onChange={e => { setSelectedId(e.target.value); load(e.target.value); }}>
-          <option value="" style={{ backgroundColor: "#0D1F3C" }}>Select a player...</option>
-          {kids.map(k => (
-            <option key={k.id} value={k.id} style={{ backgroundColor: "#0D1F3C" }}>
-              {k.name} ({k.age_group})
-            </option>
+        subtitle="Search by name or filter by age group to find a player" />
+
+      <div className="flex gap-3 mb-6 items-start">
+        {/* Age Group Filter Pills */}
+        <div className="flex gap-2 flex-wrap pt-1">
+          <button onClick={() => setAgeFilter("")}
+            style={ageFilter === ""
+              ? { backgroundColor: "#00E5CC", color: "#0A1628" }
+              : { backgroundColor: "rgba(0,229,204,0.08)", color: "#00E5CC", border: "1px solid rgba(0,229,204,0.3)" }}
+            className="px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap">
+            All Ages
+          </button>
+          {AGE_GROUPS.map(ag => (
+            <button key={ag} onClick={() => setAgeFilter(ag)}
+              style={ageFilter === ag
+                ? { backgroundColor: "#00E5CC", color: "#0A1628" }
+                : { backgroundColor: "rgba(0,229,204,0.08)", color: "#00E5CC", border: "1px solid rgba(0,229,204,0.3)" }}
+              className="px-3 py-1.5 rounded-full text-xs font-medium transition-all">
+              {ag}
+            </button>
           ))}
-        </select>
+        </div>
+
+        {/* Search Box */}
+        <div className="relative flex-1 max-w-sm">
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">🔍</span>
+            <input
+              style={{ ...input }}
+              className="w-full rounded-lg pl-9 pr-9 py-3 text-sm focus:outline-none"
+              placeholder="Search player name..."
+              value={search}
+              onChange={e => { setSearch(e.target.value); setShowDropdown(true); if (!e.target.value) clearSelection(); }}
+              onFocus={() => setShowDropdown(true)}
+              onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
+            />
+            {search && (
+              <button onClick={clearSelection}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white text-lg leading-none">
+                ×
+              </button>
+            )}
+          </div>
+
+          {/* Dropdown */}
+          {showDropdown && (
+            <div style={{ backgroundColor: "#0D1F3C", border: "1px solid rgba(0,229,204,0.2)", top: "calc(100% + 4px)" }}
+              className="absolute left-0 right-0 rounded-xl overflow-hidden z-10 shadow-xl max-h-56 overflow-y-auto">
+              {filtered.length === 0 ? (
+                <p className="text-gray-500 text-sm p-4 text-center">No players found</p>
+              ) : (
+                filtered.map(k => (
+                  <button key={k.id} onMouseDown={() => selectPlayer(k)}
+                    style={k.id === selectedId ? { backgroundColor: "rgba(0,229,204,0.1)" } : {}}
+                    className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/5 text-left transition-colors">
+                    <span className="text-white text-sm">{k.name}</span>
+                    <span style={{ backgroundColor: "rgba(0,229,204,0.1)", color: "#00E5CC" }}
+                      className="text-xs px-2 py-0.5 rounded-full">{k.age_group}</span>
+                  </button>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Selected player indicator */}
+        {selectedPlayer && (
+          <div style={{ backgroundColor: "rgba(0,229,204,0.08)", border: "1px solid rgba(0,229,204,0.3)" }}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm whitespace-nowrap mt-0.5">
+            <span style={{ color: "#00E5CC" }}>✓</span>
+            <span className="text-white">{selectedPlayer.name}</span>
+            <span style={{ color: "#00E5CC" }} className="text-xs">{selectedPlayer.age_group}</span>
+          </div>
+        )}
       </div>
+
+      {/* Result count when filtering */}
+      {(search || ageFilter) && !selectedId && (
+        <p className="text-gray-500 text-xs mb-4">
+          {filtered.length} player{filtered.length !== 1 ? "s" : ""} found
+          {ageFilter ? ` in ${ageFilter}` : ""}
+          {search ? ` matching "${search}"` : ""}
+        </p>
+      )}
 
       {loading && (
         <div className="flex items-center gap-2 text-gray-400 text-sm">
