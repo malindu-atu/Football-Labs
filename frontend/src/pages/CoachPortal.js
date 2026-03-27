@@ -31,17 +31,18 @@ export default function CoachPortal() {
   const unread = notifications.filter(n => !n.is_read).length;
 
   return (
-    <div style={pageWrapper} className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white">
+    <div style={pageWrapper} className="p-4 sm:p-6 lg:p-8">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white">
           Welcome, <span style={{ color: "#00E5CC" }}>{user?.coach?.name}</span> 👋
         </h1>
-        <p className="text-gray-400 mt-1">Age groups: {user?.coach?.age_groups?.join(", ")}</p>
+        <p className="text-gray-400 mt-1 text-sm">Age groups: {user?.coach?.age_groups?.join(", ")}</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      {/* Stacked on mobile, side-by-side on desktop */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Availability */}
-        <div style={card} className="rounded-2xl p-6">
+        <div style={card} className="rounded-2xl p-4 sm:p-6">
           <div className="flex items-center gap-2 mb-5">
             <span className="text-xl">📅</span>
             <h2 className="font-semibold text-white">Submit Availability</h2>
@@ -49,7 +50,7 @@ export default function CoachPortal() {
 
           {submitted && (
             <div style={{ backgroundColor: "rgba(0,229,204,0.1)", border: "1px solid rgba(0,229,204,0.3)" }}
-              className="rounded-lg p-3 mb-4 text-sm" style2={{ color: "#00E5CC" }}>
+              className="rounded-lg p-3 mb-4 text-sm">
               <span style={{ color: "#00E5CC" }}>✅ Availability submitted successfully!</span>
             </div>
           )}
@@ -77,7 +78,7 @@ export default function CoachPortal() {
         </div>
 
         {/* Notifications */}
-        <div style={card} className="rounded-2xl p-6">
+        <div style={card} className="rounded-2xl p-4 sm:p-6">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
               <span className="text-xl">🔔</span>
@@ -97,7 +98,7 @@ export default function CoachPortal() {
               <p className="text-gray-500 text-sm">No notifications yet</p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-80 overflow-y-auto">
               {notifications.map(n => (
                 <div key={n.id}
                   style={n.is_read
