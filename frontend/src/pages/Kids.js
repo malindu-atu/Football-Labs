@@ -8,6 +8,7 @@ export default function Kids() {
   const [kids, setKids] = useState([]);
   const [form, setForm] = useState({ name: "", date_of_birth: "", age_group: "U6", parent_name: "", parent_contact: "" });
   const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     getKids().then(r => { setKids(r.data); setLoading(false); });
@@ -18,63 +19,104 @@ export default function Kids() {
     await createKid(form);
     getKids().then(r => setKids(r.data));
     setForm({ name: "", date_of_birth: "", age_group: "U6", parent_name: "", parent_contact: "" });
+    setShowForm(false);
   };
 
   return (
-    <div style={pageWrapper} className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white">Students</h1>
-        <p className="text-gray-400 mt-1">Manage academy students across all age groups</p>
+    <div style={pageWrapper} className="p-4 sm:p-6 lg:p-8">
+      <div className="mb-6 sm:mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">Students</h1>
+          <p className="text-gray-400 mt-1 text-sm">Manage academy students across all age groups</p>
+        </div>
+        <button
+          onClick={() => setShowForm(f => !f)}
+          style={btnPrimary}
+          className="px-4 py-2 rounded-lg font-semibold text-sm hover:opacity-90 transition-all whitespace-nowrap flex-shrink-0"
+        >
+          {showForm ? "✕ Cancel" : "+ Add Student"}
+        </button>
       </div>
 
-      <div style={card} className="rounded-2xl p-6 mb-6">
-        <h2 className="font-semibold text-white mb-4">Add Student</h2>
-        <form onSubmit={handleSubmit} className="grid grid-cols-3 gap-4">
-          <div>
-            <label className="text-xs text-gray-400 mb-1.5 block">Full Name</label>
-            <input style={input} className="w-full rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
-              placeholder="Student name" value={form.name}
-              onChange={e => setForm({...form, name: e.target.value})} required />
-          </div>
-          <div>
-            <label className="text-xs text-gray-400 mb-1.5 block">Date of Birth</label>
-            <input style={input} className="w-full rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
-              type="date" value={form.date_of_birth}
-              onChange={e => setForm({...form, date_of_birth: e.target.value})} />
-          </div>
-          <div>
-            <label className="text-xs text-gray-400 mb-1.5 block">Age Group</label>
-            <select style={{ ...input, backgroundImage: "none" }}
-              className="w-full rounded-lg p-3 text-sm focus:outline-none"
-              value={form.age_group} onChange={e => setForm({...form, age_group: e.target.value})}>
-              {AGE_GROUPS.map(g => <option key={g} style={{ backgroundColor: "#0D1F3C" }}>{g}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="text-xs text-gray-400 mb-1.5 block">Parent Name</label>
-            <input style={input} className="w-full rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
-              placeholder="Parent name" value={form.parent_name}
-              onChange={e => setForm({...form, parent_name: e.target.value})} />
-          </div>
-          <div>
-            <label className="text-xs text-gray-400 mb-1.5 block">Parent Contact</label>
-            <input style={input} className="w-full rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
-              placeholder="07XXXXXXXX" value={form.parent_contact}
-              onChange={e => setForm({...form, parent_contact: e.target.value})} />
-          </div>
-          <div className="flex items-end">
-            <button style={btnPrimary} className="w-full py-3 rounded-lg font-semibold text-sm hover:opacity-90 transition-all" type="submit">
-              + Add Student
-            </button>
-          </div>
-        </form>
-      </div>
+      {/* Add Student Form */}
+      {showForm && (
+        <div style={card} className="rounded-2xl p-4 sm:p-6 mb-6">
+          <h2 className="font-semibold text-white mb-4">Add Student</h2>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label className="text-xs text-gray-400 mb-1.5 block">Full Name</label>
+              <input style={input} className="w-full rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
+                placeholder="Student name" value={form.name}
+                onChange={e => setForm({...form, name: e.target.value})} required />
+            </div>
+            <div>
+              <label className="text-xs text-gray-400 mb-1.5 block">Date of Birth</label>
+              <input style={input} className="w-full rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
+                type="date" value={form.date_of_birth}
+                onChange={e => setForm({...form, date_of_birth: e.target.value})} />
+            </div>
+            <div>
+              <label className="text-xs text-gray-400 mb-1.5 block">Age Group</label>
+              <select style={{ ...input, backgroundImage: "none" }}
+                className="w-full rounded-lg p-3 text-sm focus:outline-none"
+                value={form.age_group} onChange={e => setForm({...form, age_group: e.target.value})}>
+                {AGE_GROUPS.map(g => <option key={g} style={{ backgroundColor: "#0D1F3C" }}>{g}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-gray-400 mb-1.5 block">Parent Name</label>
+              <input style={input} className="w-full rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
+                placeholder="Parent name" value={form.parent_name}
+                onChange={e => setForm({...form, parent_name: e.target.value})} />
+            </div>
+            <div>
+              <label className="text-xs text-gray-400 mb-1.5 block">Parent Contact</label>
+              <input style={input} className="w-full rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
+                placeholder="07XXXXXXXX" value={form.parent_contact}
+                onChange={e => setForm({...form, parent_contact: e.target.value})} />
+            </div>
+            <div className="flex items-end">
+              <button style={btnPrimary} className="w-full py-3 rounded-lg font-semibold text-sm hover:opacity-90 transition-all" type="submit">
+                + Add Student
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
+      {/* Students List */}
       <div style={card} className="rounded-2xl overflow-hidden">
         <div className="p-4 border-b border-white/5">
           <h2 className="font-semibold text-white">All Students ({kids.length})</h2>
         </div>
-        <div className="overflow-x-auto">
+
+        {/* Mobile card list */}
+        <div className="block sm:hidden">
+          {loading && <p className="p-6 text-center text-gray-500 text-sm">Loading students...</p>}
+          {kids.map(k => (
+            <div key={k.id} style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }} className="p-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div style={{ backgroundColor: "rgba(0,229,204,0.15)", color: "#00E5CC" }}
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
+                  {k.name.charAt(0)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-medium text-sm truncate">{k.name}</p>
+                  <p className="text-gray-400 text-xs">{k.date_of_birth || "—"}</p>
+                </div>
+                <span style={{ backgroundColor: "rgba(0,229,204,0.1)", color: "#00E5CC" }}
+                  className="px-2 py-0.5 rounded-full text-xs flex-shrink-0">{k.age_group}</span>
+              </div>
+              <div className="ml-12 grid grid-cols-2 gap-1 text-xs text-gray-400">
+                <span>👤 {k.parent_name || "—"}</span>
+                <span>📞 {k.parent_contact || "—"}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop table */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full">
             <thead style={{ backgroundColor: "#0A1628" }}>
               <tr>{["Name","Age Group","Date of Birth","Parent","Contact"].map(h => (
