@@ -43,26 +43,27 @@ export default function Attendance() {
   const late = Object.values(attendance).filter(v => v === "late").length;
 
   return (
-    <div style={pageWrapper} className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white">Attendance</h1>
-        <p className="text-gray-400 mt-1">Mark attendance for scheduled sessions</p>
+    <div style={pageWrapper} className="p-4 sm:p-6 lg:p-8">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white">Attendance</h1>
+        <p className="text-gray-400 mt-1 text-sm">Mark attendance for scheduled sessions</p>
       </div>
 
       {!selectedSession ? (
         <>
           {sessions.length === 0 ? (
-            <div style={card} className="rounded-2xl p-12 text-center">
+            <div style={card} className="rounded-2xl p-10 sm:p-12 text-center">
               <p className="text-4xl mb-3">📅</p>
               <p className="text-white font-semibold">No scheduled sessions</p>
               <p className="text-gray-400 text-sm mt-1">All sessions have been completed or there are none scheduled.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-4">
+            /* 1 col mobile, 2 col tablet, 3 col desktop */
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {sessions.map(s => (
                 <div key={s.id} onClick={() => handleSessionSelect(s)}
                   style={{ ...card, cursor: "pointer" }}
-                  className="rounded-2xl p-6 hover:border-cyan-500/40 transition-all group">
+                  className="rounded-2xl p-5 sm:p-6 hover:border-cyan-500/40 transition-all group active:scale-95">
                   <div className="flex items-start justify-between mb-3">
                     <span style={{ backgroundColor: "rgba(0,229,204,0.1)", color: "#00E5CC" }}
                       className="px-2 py-0.5 rounded-full text-xs font-bold">{s.age_group}</span>
@@ -73,8 +74,8 @@ export default function Attendance() {
                   <p className="text-gray-400 text-sm">⏰ {s.start_time} – {s.end_time}</p>
                   <p className="text-gray-400 text-sm mt-1">🧑‍🏫 {s.coaches?.name || "No coach"}</p>
                   <p className="text-gray-400 text-sm">📍 {s.locations?.name || "—"}</p>
-                  <div style={{ color: "#00E5CC" }} className="text-xs mt-3 opacity-0 group-hover:opacity-100 transition-all">
-                    Click to mark attendance →
+                  <div style={{ color: "#00E5CC" }} className="text-xs mt-3 opacity-60 sm:opacity-0 sm:group-hover:opacity-100 transition-all">
+                    Tap to mark attendance →
                   </div>
                 </div>
               ))}
@@ -83,56 +84,60 @@ export default function Attendance() {
         </>
       ) : (
         <div style={card} className="rounded-2xl overflow-hidden">
+          {/* Header */}
           <div style={{ backgroundColor: "#0A1628", borderBottom: "1px solid rgba(255,255,255,0.05)" }}
-            className="p-5 flex items-center justify-between">
-            <div>
-              <h2 className="font-semibold text-white">{selectedSession.age_group} — {selectedSession.date}</h2>
-              <p className="text-gray-400 text-sm">{selectedSession.start_time} – {selectedSession.end_time}</p>
+            className="p-4 sm:p-5 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="font-semibold text-white text-sm sm:text-base truncate">
+                {selectedSession.age_group} — {selectedSession.date}
+              </h2>
+              <p className="text-gray-400 text-xs sm:text-sm">{selectedSession.start_time} – {selectedSession.end_time}</p>
             </div>
             <button onClick={() => setSelectedSession(null)}
               style={{ border: "1px solid rgba(255,255,255,0.1)", color: "#9CA3AF" }}
-              className="px-4 py-1.5 rounded-lg text-sm hover:bg-white/5 transition-all">
+              className="px-3 sm:px-4 py-1.5 rounded-lg text-sm hover:bg-white/5 transition-all flex-shrink-0">
               ← Back
             </button>
           </div>
 
-          {/* Summary */}
-          <div className="p-4 flex gap-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+          {/* Summary badges */}
+          <div className="p-3 sm:p-4 flex gap-2 sm:gap-3 flex-wrap" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
             {[
               { label: "Present", count: present, color: "#00E5CC", bg: "rgba(0,229,204,0.1)" },
               { label: "Absent", count: absent, color: "#F87171", bg: "rgba(239,68,68,0.1)" },
               { label: "Late", count: late, color: "#FCD34D", bg: "rgba(251,191,36,0.1)" },
             ].map(s => (
-              <div key={s.label} style={{ backgroundColor: s.bg }} className="px-4 py-2 rounded-lg flex items-center gap-2">
-                <span style={{ color: s.color }} className="font-bold">{s.count}</span>
-                <span style={{ color: s.color }} className="text-sm">{s.label}</span>
+              <div key={s.label} style={{ backgroundColor: s.bg }} className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg flex items-center gap-2">
+                <span style={{ color: s.color }} className="font-bold text-sm sm:text-base">{s.count}</span>
+                <span style={{ color: s.color }} className="text-xs sm:text-sm">{s.label}</span>
               </div>
             ))}
           </div>
 
+          {/* Student rows */}
           <table className="w-full">
             <thead style={{ backgroundColor: "#0A1628" }}>
               <tr>
-                <th className="p-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Student</th>
-                <th className="p-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
+                <th className="p-3 sm:p-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Student</th>
+                <th className="p-3 sm:p-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
               </tr>
             </thead>
             <tbody>
               {kids.map(k => (
                 <tr key={k.id} style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
+                  <td className="p-3 sm:p-4">
+                    <div className="flex items-center gap-2 sm:gap-3">
                       <div style={{ backgroundColor: "rgba(0,229,204,0.1)", color: "#00E5CC" }}
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold flex-shrink-0">
                         {k.name.charAt(0)}
                       </div>
-                      <span className="text-white text-sm">{k.name}</span>
+                      <span className="text-white text-xs sm:text-sm">{k.name}</span>
                     </div>
                   </td>
-                  <td className="p-4">
+                  <td className="p-3 sm:p-4">
                     <select
                       style={{ ...statusStyle(attendance[k.id]), border: "none", outline: "none", cursor: "pointer" }}
-                      className="px-3 py-1.5 rounded-lg text-sm font-medium"
+                      className="px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium"
                       value={attendance[k.id]}
                       onChange={e => setAttendance({...attendance, [k.id]: e.target.value})}>
                       <option value="present" style={{ backgroundColor: "#0D1F3C", color: "white" }}>Present</option>
@@ -145,10 +150,10 @@ export default function Attendance() {
             </tbody>
           </table>
 
-          <div className="p-5" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+          <div className="p-4 sm:p-5" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
             <button onClick={handleSubmit} disabled={submitting}
               style={{ backgroundColor: "#00E5CC", color: "#0A1628" }}
-              className="px-8 py-2.5 rounded-lg font-bold text-sm hover:opacity-90 disabled:opacity-50 transition-all">
+              className="w-full sm:w-auto px-8 py-2.5 rounded-lg font-bold text-sm hover:opacity-90 disabled:opacity-50 transition-all">
               {submitting ? "Submitting..." : "Submit Attendance ✓"}
             </button>
           </div>
