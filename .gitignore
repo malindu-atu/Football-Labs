@@ -10,4 +10,4 @@ frontend/.env
 frontend/build/
 
 # General
-.DS_Store
+.DS_Store.env
