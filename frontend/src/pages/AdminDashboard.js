@@ -27,7 +27,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     getOverviewAnalytics().then(r => setOverview(r.data));
     getAgeGroupAnalytics().then(r => {
-      setAgeData(Object.entries(r.data).map(([name, value]) => ({ name, value })));
+      setAgeData(Object.entries(r.data).map(([name, value]) => ({ name, value: value.players ?? value })));
     });
   }, []);
 
