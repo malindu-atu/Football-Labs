@@ -7,6 +7,7 @@ import Sessions from "./pages/Sessions";
 import Kids from "./pages/Kids";
 import Attendance from "./pages/Attendance";
 import Analytics from "./pages/Analytics";
+import Payments from "./pages/Payments";
 import CoachPortal from "./pages/CoachPortal";
 import Navbar from "./components/Navbar";
 
@@ -41,6 +42,9 @@ function AppRoutes() {
         } />
         <Route path="/analytics" element={
           <PrivateRoute><Analytics /></PrivateRoute>
+        } />
+        <Route path="/payments" element={
+          <PrivateRoute role="admin"><Payments /></PrivateRoute>
         } />
         <Route path="/coach-portal" element={
           <PrivateRoute role="coach"><CoachPortal /></PrivateRoute>
