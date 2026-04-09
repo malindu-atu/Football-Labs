@@ -9,7 +9,7 @@ import os
 
 router = APIRouter()
 
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 
 class KidCreate(BaseModel):
     name: str
@@ -40,10 +40,10 @@ def get_kids_by_age_group(age_group: str):
 @router.post("/extract-enrollment")
 async def extract_enrollment(file: UploadFile = File(...)):
     """
-    Accepts an enrollment document image and uses Claude vision to extract student details.
+    Accepts an enrollment document image and uses Groq vision to extract student details.
     """
-    if not ANTHROPIC_API_KEY:
-        raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY is not configured in .env")
+    if not GROQ_API_KEY:
+        raise HTTPException(status_code=500, detail="GROQ_API_KEY is not configured in .env")
 
     image_bytes = await file.read()
     image_b64 = base64.standard_b64encode(image_bytes).decode("utf-8")
@@ -71,28 +71,28 @@ Rules:
 
     async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.post(
-            "https://api.anthropic.com/v1/messages",
+            "https://api.groq.com/openai/v1/chat/completions",
             headers={
-                "x-api-key": ANTHROPIC_API_KEY,
-                "anthropic-version": "2023-06-01",
-                "content-type": "application/json",
+                "Authorization": f"Bearer {GROQ_API_KEY}",
+                "Content-Type": "application/json",
             },
             json={
-                "model": "claude-sonnet-4-20250514",
+                "model": "meta-llama/llama-4-scout-17b-16e-instruct",
                 "max_tokens": 500,
                 "messages": [
                     {
                         "role": "user",
                         "content": [
                             {
-                                "type": "image",
-                                "source": {
-                                    "type": "base64",
-                                    "media_type": content_type,
-                                    "data": image_b64,
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:{content_type};base64,{image_b64}"
                                 },
                             },
-                            {"type": "text", "text": prompt},
+                            {
+                                "type": "text",
+                                "text": prompt,
+                            },
                         ],
                     }
                 ],
@@ -100,10 +100,10 @@ Rules:
         )
 
     if response.status_code != 200:
-        raise HTTPException(status_code=502, detail=f"Claude API error: {response.text}")
+        raise HTTPException(status_code=502, detail=f"Groq API error: {response.text}")
 
     result = response.json()
-    raw_text = result["content"][0]["text"].strip()
+    raw_text = result["choices"][0]["message"]["content"].strip()
 
     if raw_text.startswith("```"):
         raw_text = raw_text.split("```")[1]
@@ -114,7 +114,7 @@ Rules:
     try:
         extracted = json.loads(raw_text)
     except json.JSONDecodeError:
-        raise HTTPException(status_code=422, detail=f"Could not parse Claude response: {raw_text}")
+        raise HTTPException(status_code=422, detail=f"Could not parse Groq response: {raw_text}")
 
     return ExtractedStudentData(**extracted)
 

@@ -19,8 +19,8 @@ export default function Login() {
       const res = await loginApi({ email, password });
       login(res.data);
       navigate(res.data.role === "admin" ? "/" : "/coach-portal");
-    } catch {
-      setError("Invalid email or password. Please try again.");
+    } catch (err) {
+      setError(err.response?.data?.detail || err.message || "Invalid email or password.");
     } finally {
       setLoading(false);
     }
@@ -30,7 +30,6 @@ export default function Login() {
     <div style={{ backgroundColor: "#060D1A", minHeight: "100vh" }}
       className="flex items-center justify-center p-4">
 
-      {/* Background grid effect */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div style={{
           backgroundImage: "linear-gradient(rgba(0,229,204,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,204,0.03) 1px, transparent 1px)",
@@ -39,7 +38,6 @@ export default function Login() {
       </div>
 
       <div className="w-full max-w-md relative">
-        {/* Glow effect */}
         <div style={{
           background: "radial-gradient(ellipse at center, rgba(0,229,204,0.15) 0%, transparent 70%)",
           width: "400px", height: "400px",
@@ -47,14 +45,12 @@ export default function Login() {
           transform: "translateX(-50%)", pointerEvents: "none"
         }} />
 
-        {/* Card */}
         <div style={{
           backgroundColor: "#0D1F3C",
           border: "1px solid rgba(0,229,204,0.2)",
           boxShadow: "0 0 40px rgba(0,229,204,0.1)"
         }} className="rounded-2xl p-8 relative">
 
-          {/* Logo area */}
           <div className="text-center mb-8">
             <div style={{
               width: "64px", height: "64px",
@@ -81,50 +77,26 @@ export default function Login() {
             <div>
               <label className="text-sm text-gray-400 mb-1.5 block">Email</label>
               <input
-                style={{
-                  backgroundColor: "#0A1628",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  color: "white"
-                }}
+                style={{ backgroundColor: "#0A1628", border: "1px solid rgba(255,255,255,0.1)", color: "white" }}
                 className="w-full rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all"
-                type="email"
-                placeholder="you@fbl.lk"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required />
+                type="email" placeholder="you@fbl.lk"
+                value={email} onChange={e => setEmail(e.target.value)} required />
             </div>
             <div>
               <label className="text-sm text-gray-400 mb-1.5 block">Password</label>
               <input
-                style={{
-                  backgroundColor: "#0A1628",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  color: "white"
-                }}
+                style={{ backgroundColor: "#0A1628", border: "1px solid rgba(255,255,255,0.1)", color: "white" }}
                 className="w-full rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required />
+                type="password" placeholder="••••••••"
+                value={password} onChange={e => setPassword(e.target.value)} required />
             </div>
             <button
-              style={{
-                backgroundColor: loading ? "#00C4AE" : "#00E5CC",
-                color: "#0A1628"
-              }}
+              style={{ backgroundColor: loading ? "#00C4AE" : "#00E5CC", color: "#0A1628" }}
               className="w-full py-3 rounded-lg font-bold text-sm hover:opacity-90 transition-all disabled:opacity-50 mt-2"
-              type="submit"
-              disabled={loading}>
+              type="submit" disabled={loading}>
               {loading ? "Signing in..." : "Sign In →"}
             </button>
           </form>
-
-          <div style={{ backgroundColor: "#0A1628", border: "1px solid rgba(255,255,255,0.06)" }}
-            className="mt-6 rounded-lg p-3 text-xs text-gray-500">
-            <p><span style={{ color: "#00E5CC" }}>Admin:</span> admin@academy.lk / admin123</p>
-            <p className="mt-1"><span style={{ color: "#00E5CC" }}>Coach:</span> ashan@academy.lk / coach123</p>
-          </div>
         </div>
       </div>
     </div>

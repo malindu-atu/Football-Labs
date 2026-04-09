@@ -1,14 +1,33 @@
 import axios from "axios";
+import { createClient } from "@supabase/supabase-js";
+
+// Supabase client for auth only
+export const supabase = createClient(
+  "https://tdyznraszanwxtqsgrff.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkeXpucmFzemFud3h0cXNncmZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0ODcwNzAsImV4cCI6MjA5MDA2MzA3MH0.aGpCGR2u9RXWgWRuyg59ovDjbPBZxuIdA6dTat8mTD0"
+);
 
 const api = axios.create({ baseURL: "http://localhost:8000/api" });
 
 api.interceptors.request.use((config) => {
   const user = JSON.parse(localStorage.getItem("user"));
-  if (user?.token) config.headers.Authorization = `Bearer ${user.token}`;
+  if (user?.access_token) config.headers.Authorization = `Bearer ${user.access_token}`;
   return config;
 });
 
-export const loginApi = (data) => api.post("/auth/login", data);
+// Auth — sign in via Supabase, then fetch role from backend
+export const loginApi = async ({ email, password }) => {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw new Error(error.message);
+
+  const access_token = data.session.access_token;
+  const meRes = await api.post("/auth/me", { access_token });
+  return { data: { ...meRes.data, access_token } };
+};
+
+export const logoutApi = async () => {
+  await supabase.auth.signOut();
+};
 
 // Coaches
 export const getCoaches = () => api.get("/coaches");
@@ -45,8 +64,12 @@ export const getStudentAnalytics = (id) => api.get(`/analytics/student/${id}`);
 export const getAgeGroupAnalytics = () => api.get("/analytics/age-group");
 export const getLocationAnalytics = () => api.get("/analytics/location");
 export const getRetentionAnalytics = () => api.get("/analytics/retention");
+
 // Payments
 export const getPayments = (month) => api.get(`/payments${month ? `?month=${month}` : ""}`);
 export const getPaymentSummary = (month) => api.get(`/payments/summary/${month}`);
 export const upsertPayment = (data) => api.post("/payments", data);
 export const getKidPayments = (id) => api.get(`/payments/kid/${id}`);
+
+// Add with the other auth exports
+export const createUser = (data) => api.post("/auth/create-user", data);
