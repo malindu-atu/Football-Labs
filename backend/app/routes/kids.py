@@ -1,15 +1,13 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from pydantic import BaseModel
 from app.database import supabase
+from app.config import settings
 from typing import Optional
 import httpx
 import base64
 import json
-import os
 
 router = APIRouter()
-
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 
 class KidCreate(BaseModel):
     name: str
@@ -39,10 +37,7 @@ def get_kids_by_age_group(age_group: str):
 
 @router.post("/extract-enrollment")
 async def extract_enrollment(file: UploadFile = File(...)):
-    """
-    Accepts an enrollment document image and uses Groq vision to extract student details.
-    """
-    if not GROQ_API_KEY:
+    if not settings.GROQ_API_KEY:
         raise HTTPException(status_code=500, detail="GROQ_API_KEY is not configured in .env")
 
     image_bytes = await file.read()
@@ -53,7 +48,7 @@ async def extract_enrollment(file: UploadFile = File(...)):
         content_type = "image/jpeg"
 
     prompt = """You are analyzing a football/soccer academy enrollment document.
-Extract the following student details from this document and return ONLY valid JSON with these exact keys:
+Extract the following student details and return ONLY valid JSON with these exact keys:
 {
   "name": "full name of the student",
   "date_of_birth": "date in YYYY-MM-DD format or null",
@@ -62,45 +57,47 @@ Extract the following student details from this document and return ONLY valid J
   "parent_contact": "phone number or null",
   "enrollment_date": "date in YYYY-MM-DD format or null"
 }
-
 Rules:
 - Convert all dates to YYYY-MM-DD format
 - If a field is not found, use null
 - Infer age_group from date of birth if not explicitly stated
 - Return ONLY the JSON object, no explanation or markdown"""
 
-    async with httpx.AsyncClient(timeout=30.0) as client:
-        response = await client.post(
-            "https://api.groq.com/openai/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {GROQ_API_KEY}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "model": "meta-llama/llama-4-scout-17b-16e-instruct",
-                "max_tokens": 500,
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:{content_type};base64,{image_b64}"
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {settings.GROQ_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+                    "max_tokens": 500,
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": f"data:{content_type};base64,{image_b64}"
+                                    },
                                 },
-                            },
-                            {
-                                "type": "text",
-                                "text": prompt,
-                            },
-                        ],
-                    }
-                ],
-            },
-        )
+                                {
+                                    "type": "text",
+                                    "text": prompt,
+                                },
+                            ],
+                        }
+                    ],
+                },
+            )
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Request to Groq failed: {str(e)}")
 
     if response.status_code != 200:
-        raise HTTPException(status_code=502, detail=f"Groq API error: {response.text}")
+        raise HTTPException(status_code=502, detail=f"Groq API error {response.status_code}: {response.text}")
 
     result = response.json()
     raw_text = result["choices"][0]["message"]["content"].strip()
