@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getKids, markAttendance, getSessionAttendance } from "../api";
 import { useAuth } from "../context/AuthContext";
 import { pageWrapper, card, input, btnPrimary, btnOutline } from "../components/UI";
+import StudentFilter from "../components/StudentFilter";
 import axios from "axios";
 
 const api = axios.create({ baseURL: "http://localhost:8000/api" });
@@ -36,6 +37,9 @@ export default function Attendance() {
   const [showWalkIn, setShowWalkIn] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [locations, setLocations] = useState([]);
+  const [walkInAge, setWalkInAge] = useState("");
+  const [walkInLocation, setWalkInLocation] = useState("");
 
   const isCoach = user?.role === "coach";
 
@@ -60,6 +64,7 @@ export default function Attendance() {
   useEffect(() => {
     loadSessions();
     getKids().then(r => setAllKids(r.data));
+    api.get("/locations").then(r => setLocations(r.data)).catch(() => {});
   }, []);
 
   const handleSessionSelect = async (session) => {
@@ -123,7 +128,8 @@ export default function Attendance() {
     ? allKids.filter(k =>
         k.name.toLowerCase().includes(walkInSearch.toLowerCase()) &&
         attendance[k.id] === undefined &&
-        !walkIns.find(w => w.kid_id === k.id)
+        !walkIns.find(w => w.kid_id === k.id) &&
+        (!walkInAge || k.age_group === walkInAge)
       )
     : [];
 
@@ -269,7 +275,17 @@ export default function Attendance() {
           </div>
 
           {showWalkIn && (
-            <div className="mb-3 relative">
+            <div className="mb-3">
+              <div className="mb-2">
+                <StudentFilter
+                  search=""
+                  onSearch={() => {}}
+                  ageFilter={walkInAge} onAge={setWalkInAge}
+                  locationFilter={walkInLocation} onLocation={setWalkInLocation}
+                  locations={locations}
+                />
+              </div>
+              <div className="relative">
               <input style={input}
                 className="w-full rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
                 placeholder="Search student name…"
@@ -292,6 +308,7 @@ export default function Attendance() {
               {walkInSearch.length > 1 && walkInSuggestions.length === 0 && (
                 <p className="text-gray-500 text-xs mt-2">No students found.</p>
               )}
+              </div>
             </div>
           )}
 

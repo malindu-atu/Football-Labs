@@ -1,6 +1,16 @@
 import { useEffect, useState, useCallback } from "react";
 import { getKids, getPayments, getPaymentSummary, upsertPayment } from "../api";
 import { pageWrapper, card, input, btnPrimary } from "../components/UI";
+import StudentFilter from "../components/StudentFilter";
+import axios from "axios";
+
+const api2 = axios.create({ baseURL: "http://localhost:8000/api" });
+api2.interceptors.request.use(c => {
+  const u = JSON.parse(localStorage.getItem("user"));
+  if (u?.access_token) c.headers.Authorization = `Bearer ${u.access_token}`;
+  return c;
+});
+const getLocations = () => api2.get("/locations");
 
 const STATUS_CONFIG = {
   paid:   { label: "Paid",   color: "#00E5CC", bg: "rgba(0,229,204,0.12)",  icon: "✓" },
@@ -120,13 +130,17 @@ export default function Payments() {
   const [ageFilter, setAgeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [modalKid, setModalKid] = useState(null);
+  const [locations, setLocations] = useState([]);
+  const [locationFilter, setLocationFilter] = useState("");
 
   const AGE_GROUPS = ["U6","U7","U8","U9","U10","U11","U12","U13","U14","U15","U16"];
 
   const load = useCallback(async () => {
     setLoading(true);
+    const kidsParams = {};
+    if (locationFilter) kidsParams.location_id = locationFilter;
     const [kidsRes, paymentsRes, summaryRes] = await Promise.all([
-      getKids(),
+      getKids(kidsParams),
       getPayments(month),
       getPaymentSummary(month),
     ]);
@@ -136,9 +150,10 @@ export default function Payments() {
     setPaymentMap(map);
     setSummary(summaryRes.data);
     setLoading(false);
-  }, [month]);
+  }, [month, locationFilter]);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { getLocations().then(r => setLocations(r.data)); }, []);
 
   const cycleStatus = async (kid) => {
     const current = paymentMap[kid.id]?.status || "unpaid";
@@ -262,38 +277,29 @@ export default function Payments() {
 
       {/* Filters + actions */}
       <div style={card} className="rounded-2xl overflow-hidden">
-        <div className="p-4 border-b border-white/5 flex flex-wrap gap-3 items-center">
-          {/* Search */}
-          <div className="relative flex-1 min-w-[160px] max-w-xs">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">🔍</span>
-            <input style={input} className="w-full rounded-lg pl-8 pr-3 py-2 text-sm focus:outline-none"
-              placeholder="Search student…" value={search} onChange={e => setSearch(e.target.value)} />
-          </div>
-
-          {/* Age filter */}
-          <select style={{ ...input, backgroundImage: "none" }}
-            className="rounded-lg px-3 py-2 text-sm focus:outline-none"
-            value={ageFilter} onChange={e => setAgeFilter(e.target.value)}>
-            <option value="" style={{ backgroundColor: "#0D1F3C" }}>All Ages</option>
-            {AGE_GROUPS.map(g => <option key={g} style={{ backgroundColor: "#0D1F3C" }}>{g}</option>)}
-          </select>
-
-          {/* Status filter */}
-          <select style={{ ...input, backgroundImage: "none" }}
-            className="rounded-lg px-3 py-2 text-sm focus:outline-none"
-            value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
-            <option value="" style={{ backgroundColor: "#0D1F3C" }}>All Statuses</option>
-            <option value="unpaid" style={{ backgroundColor: "#0D1F3C" }}>Unpaid</option>
-            <option value="paid" style={{ backgroundColor: "#0D1F3C" }}>Paid</option>
-            <option value="waived" style={{ backgroundColor: "#0D1F3C" }}>Waived</option>
-          </select>
-
-          <div className="ml-auto">
-            <button onClick={markAllPaid} style={btnPrimary}
-              className="px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-all whitespace-nowrap">
-              ✓ Mark Visible as Paid
-            </button>
-          </div>
+        <div className="p-4 border-b border-white/5">
+          <StudentFilter
+            search={search} onSearch={setSearch}
+            ageFilter={ageFilter} onAge={setAgeFilter}
+            locationFilter={locationFilter} onLocation={setLocationFilter}
+            locations={locations}
+            resultCount={filteredKids.length}
+          >
+            <div className="flex items-center gap-2">
+              <select style={{ ...input, backgroundImage: "none" }}
+                className="rounded-lg px-3 py-2 text-sm focus:outline-none"
+                value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+                <option value="" style={{ backgroundColor: "#0D1F3C" }}>All Statuses</option>
+                <option value="unpaid" style={{ backgroundColor: "#0D1F3C" }}>Unpaid</option>
+                <option value="paid" style={{ backgroundColor: "#0D1F3C" }}>Paid</option>
+                <option value="waived" style={{ backgroundColor: "#0D1F3C" }}>Waived</option>
+              </select>
+              <button onClick={markAllPaid} style={btnPrimary}
+                className="px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-all whitespace-nowrap">
+                ✓ Mark Visible as Paid
+              </button>
+            </div>
+          </StudentFilter>
         </div>
 
         {/* Mobile list */}
