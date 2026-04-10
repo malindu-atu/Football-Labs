@@ -42,14 +42,8 @@ export default function Navbar() {
     >
       {/* Logo */}
       <Link to="/" className="flex items-center gap-2.5 flex-shrink-0">
-        <div
-          style={{
-            background: "linear-gradient(135deg, #00E5CC 0%, #0099ff 100%)",
-            boxShadow: "0 0 14px rgba(0,229,204,0.4)",
-          }}
-          className="w-8 h-8 rounded-lg flex items-center justify-center"
-        >
-          <Footprints size={16} color="#080F1E" strokeWidth={2.5} />
+        <div>
+        <img src="/logo512.jpg" alt="FBL" className="h-10 w-auto"/>
         </div>
         <span className="font-extrabold text-white text-base tracking-tight">
           FBL<span style={{ color: "#00E5CC" }}>.</span>
