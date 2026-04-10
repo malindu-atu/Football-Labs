@@ -86,7 +86,7 @@ function SessionRow({ t, coaches, onAssignCoach, onDelete, onManageStudents }) {
 
 // ── Location tile (expanded view) ──────────────────────────────────────────
 
-function LocationTile({ loc, coaches, allKids, onRefresh }) {
+function LocationTile({ loc, coaches, allKids, onRefresh, onDelete }) {
   const [expanded, setExpanded] = useState(false);
   const [showAddSession, setShowAddSession] = useState(false);
   const [form, setForm] = useState({ day_of_week: "Monday", start_time: "", end_time: "", age_group: "U6", coach_id: "" });
@@ -163,10 +163,10 @@ function LocationTile({ loc, coaches, allKids, onRefresh }) {
                 <p className="text-white text-lg font-bold">{totalStudents}</p>
                 <p className="text-gray-500 text-xs">students</p>
               </div>
-              <span className="text-lg transition-transform"
-               style={{transform: expanded ? "rotate(180deg)" : "none",color: expanded ? "#00E5CC" : "#6B7280"}}>
+              <span style={{ color: expanded ? "#00E5CC" : "#6B7280" }}
+                className="text-lg transition-transform" style={{ transform: expanded ? "rotate(180deg)" : "none", color: "#6B7280" }}>
                 ›
-                </span>
+              </span>
             </div>
           </div>
 
@@ -262,6 +262,15 @@ function LocationTile({ loc, coaches, allKids, onRefresh }) {
                 + Add Session to this Location
               </button>
             )}
+
+            {/* Remove location — only shown when expanded */}
+            <div className="mt-4 pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+              <button onClick={() => onDelete(loc.id)}
+                style={{ color: "#F87171", border: "1px solid rgba(248,113,113,0.2)" }}
+                className="px-3 py-1.5 rounded-lg text-xs hover:bg-red-500/10 transition-all">
+                🗑 Remove Location
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -404,20 +413,14 @@ export default function Sessions() {
 
       <div className="space-y-4">
         {locations.map(loc => (
-          <div key={loc.id} className="relative group">
-            <LocationTile
-              loc={loc}
-              coaches={coaches}
-              allKids={allKids}
-              onRefresh={load}
-            />
-            <button
-              onClick={() => handleDeleteLocation(loc.id)}
-              style={{ color: "#F87171", border: "1px solid rgba(248,113,113,0.2)" }}
-              className="absolute top-4 right-14 px-2 py-1 rounded-lg text-xs hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100">
-              Remove Location
-            </button>
-          </div>
+          <LocationTile
+            key={loc.id}
+            loc={loc}
+            coaches={coaches}
+            allKids={allKids}
+            onRefresh={load}
+            onDelete={handleDeleteLocation}
+          />
         ))}
       </div>
     </div>
