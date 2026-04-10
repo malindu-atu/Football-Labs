@@ -1,80 +1,99 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import {
+  LayoutDashboard, Users, CalendarDays, GraduationCap,
+  ClipboardCheck, CreditCard, BarChart3, UserCog, LogOut, Footprints
+} from "lucide-react";
+
+const NAV_ITEMS = [
+  { to: "/",          label: "Dashboard", icon: LayoutDashboard },
+  { to: "/coaches",   label: "Coaches",   icon: Users           },
+  { to: "/sessions",  label: "Sessions",  icon: CalendarDays    },
+  { to: "/kids",      label: "Students",  icon: GraduationCap   },
+  { to: "/attendance",label: "Attendance",icon: ClipboardCheck  },
+  { to: "/payments",  label: "Payments",  icon: CreditCard      },
+  { to: "/analytics", label: "Analytics", icon: BarChart3       },
+  { to: "/users",     label: "Users",     icon: UserCog         },
+];
+
+const COACH_ITEMS = [
+  { to: "/coach-portal", label: "My Portal",  icon: LayoutDashboard },
+  { to: "/attendance",   label: "Attendance", icon: ClipboardCheck  },
+];
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
-
+  const handleLogout = () => { logout(); navigate("/login"); };
   const isActive = (path) => location.pathname === path;
 
-  const navLink = (to, label) => (
-    <Link
-      to={to}
-      className={`text-sm px-3 py-2 rounded-lg transition-all duration-200 ${
-        isActive(to)
-          ? "bg-cyan-500 text-navy-900 font-semibold"
-          : "text-gray-300 hover:text-cyan-400 hover:bg-white/5"
-      }`}
-      style={isActive(to) ? { backgroundColor: "#00E5CC", color: "#0A1628" } : {}}
-    >
-      {label}
-    </Link>
-  );
+  const items = user?.role === "admin" ? NAV_ITEMS : COACH_ITEMS;
 
   return (
-    <nav style={{ backgroundColor: "#0A1628", borderBottom: "1px solid rgba(0,229,204,0.15)" }}
-      className="px-6 py-3 flex items-center justify-between sticky top-0 z-50">
-      
+    <nav
+      style={{
+        backgroundColor: "#080F1E",
+        borderBottom: "1px solid rgba(0,229,204,0.12)",
+        backdropFilter: "blur(12px)",
+      }}
+      className="px-5 py-0 flex items-center justify-between sticky top-0 z-50 h-14"
+    >
       {/* Logo */}
-      <div className="flex items-center gap-3">
-        <div style={{ backgroundColor: "#0D1F3C", border: "1px solid rgba(0,229,204,0.3)" }}
-          className="w-9 h-9 rounded-lg flex items-center justify-center">
-          <span className="text-lg">⚽</span>
+      <Link to="/" className="flex items-center gap-2.5 flex-shrink-0">
+        <div
+          style={{
+            background: "linear-gradient(135deg, #00E5CC 0%, #0099ff 100%)",
+            boxShadow: "0 0 14px rgba(0,229,204,0.4)",
+          }}
+          className="w-8 h-8 rounded-lg flex items-center justify-center"
+        >
+          <Footprints size={16} color="#080F1E" strokeWidth={2.5} />
         </div>
-        <div>
-          <span className="font-bold text-white text-lg tracking-wide">FBL</span>
-          <span style={{ color: "#00E5CC" }} className="font-bold text-lg"> Academy</span>
-        </div>
+        <span className="font-extrabold text-white text-base tracking-tight">
+          FBL<span style={{ color: "#00E5CC" }}>.</span>
+        </span>
+      </Link>
+
+      {/* Nav links */}
+      <div className="flex items-center gap-0.5 overflow-x-auto">
+        {items.map(({ to, label, icon: Icon }) => {
+          const active = isActive(to);
+          return (
+            <Link
+              key={to}
+              to={to}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 whitespace-nowrap"
+              style={active
+                ? { backgroundColor: "rgba(0,229,204,0.15)", color: "#00E5CC" }
+                : { color: "#6B7280" }
+              }
+            >
+              <Icon size={14} strokeWidth={active ? 2.5 : 2} />
+              {label}
+            </Link>
+          );
+        })}
       </div>
 
-      {/* Nav Links */}
-      <div className="flex items-center gap-1">
-        {user?.role === "admin" && (
-          <>
-            {navLink("/", "Dashboard")}
-            {navLink("/coaches", "Coaches")}
-            {navLink("/sessions", "Sessions")}
-            {navLink("/kids", "Students")}
-            {navLink("/attendance", "Attendance")}
-            {navLink("/payments", "Payments")}
-            {navLink("/analytics", "Analytics")}
-          </>
-        )}
-        {user?.role === "coach" && (
-          <>
-            {navLink("/coach-portal", "My Portal")}
-            {navLink("/attendance", "Attendance")}
-          </>
-        )}
-      </div>
-
-      {/* User info + logout */}
-      <div className="flex items-center gap-3">
-        <div className="text-right">
-          <p className="text-xs text-gray-400">{user?.role?.toUpperCase()}</p>
-          <p className="text-sm text-white">{user?.coach?.name || "Admin"}</p>
+      {/* User + logout */}
+      <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="text-right hidden sm:block">
+          <p className="text-xs font-medium text-white leading-tight">
+            {user?.profile
+              ? `${user.profile.first_name} ${user.profile.last_name}`.trim()
+              : user?.coach?.name || "Admin"}
+          </p>
+          <p className="text-xs" style={{ color: "#00E5CC" }}>{user?.role}</p>
         </div>
         <button
           onClick={handleLogout}
-          style={{ border: "1px solid rgba(0,229,204,0.3)", color: "#00E5CC" }}
-          className="px-4 py-1.5 rounded-lg text-sm hover:bg-cyan-500/10 transition-all">
-          Logout
+          style={{ backgroundColor: "rgba(255,255,255,0.05)", color: "#9CA3AF" }}
+          className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-red-500/20 hover:text-red-400 transition-all"
+          title="Logout"
+        >
+          <LogOut size={15} />
         </button>
       </div>
     </nav>
