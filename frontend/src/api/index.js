@@ -44,7 +44,7 @@ export const updateSession = (id, data) => api.put(`/sessions/${id}`, data);
 export const getUnassignedSessions = () => api.get("/sessions/unassigned");
 
 // Kids
-export const getKids = () => api.get("/kids");
+export const getKids = (params = {}) => api.get("/kids", { params });
 export const getKidsByAgeGroup = (ag) => api.get(`/kids/age-group/${ag}`);
 export const createKid = (data) => api.post("/kids", data);
 
@@ -73,3 +73,5 @@ export const getKidPayments = (id) => api.get(`/payments/kid/${id}`);
 
 // Add with the other auth exports
 export const createUser = (data) => api.post("/auth/create-user", data);
+// Locations
+export const getLocations = () => api.get("/locations");
