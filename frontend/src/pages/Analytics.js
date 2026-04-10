@@ -9,6 +9,11 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   LineChart, Line, PieChart, Pie, Cell, Legend
 } from "recharts";
+import {
+  User, GraduationCap, MapPin, RefreshCw, TrendingUp,
+  CheckCircle2, LayoutGrid, Clock, Target, Timer, X,
+  ChevronDown, Loader2
+} from "lucide-react";
 
 const COLORS = ["#00E5CC", "#4DFFD2", "#00C4AE", "#FCD34D", "#F87171", "#A78BFA"];
 
@@ -53,10 +58,10 @@ const RateBar = ({ label, value }) => {
   );
 };
 
-const SectionHeader = ({ icon, title, subtitle }) => (
+const SectionHeader = ({ icon: Icon, title, subtitle }) => (
   <div className="mb-6">
     <div className="flex items-center gap-3 mb-1">
-      <span className="text-2xl">{icon}</span>
+      <Icon size={22} style={{ color: "#00E5CC" }} strokeWidth={1.75} />
       <h2 className="text-xl font-bold text-white">{title}</h2>
     </div>
     {subtitle && <p className="text-gray-400 text-sm ml-9">{subtitle}</p>}
@@ -72,9 +77,6 @@ function PlayerAnalytics({ kids, locations }) {
   const [locationFilter, setLocationFilter] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
 
-  // location filter: kids enrolled at a location via session_enrollments
-  // We don't have that data here, so we filter by what the parent passed
-  // (parent reloads kids when locationFilter changes via onLocationChange callback)
   const filtered = kids.filter(k => {
     const matchesSearch = k.name.toLowerCase().includes(search.toLowerCase());
     const matchesAge = ageFilter ? k.age_group === ageFilter : true;
@@ -111,7 +113,7 @@ function PlayerAnalytics({ kids, locations }) {
 
   return (
     <div>
-      <SectionHeader icon="👦" title="Player Analytics"
+      <SectionHeader icon={User} title="Player Analytics"
         subtitle="Search by name or filter by age group to find a player" />
 
       <div className="mb-4">
@@ -128,7 +130,7 @@ function PlayerAnalytics({ kids, locations }) {
       {/* Player search dropdown */}
       <div className="relative mb-6">
         <div className="relative max-w-sm">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">👦</span>
+          <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
           <input style={{ ...input }}
             className="w-full rounded-lg pl-9 pr-9 py-3 text-sm focus:outline-none"
             placeholder="Select a player…"
@@ -136,25 +138,31 @@ function PlayerAnalytics({ kids, locations }) {
             onChange={e => { setSearch(e.target.value); setShowDropdown(true); if (!e.target.value) clearSelection(); }}
             onFocus={() => setShowDropdown(true)}
             onBlur={() => setTimeout(() => setShowDropdown(false), 150)} />
-          {search && <button onClick={clearSelection} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white text-lg leading-none">×</button>}
+          {search && (
+            <button onClick={clearSelection} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
+              <X size={14} />
+            </button>
+          )}
         </div>
         {showDropdown && (
           <div style={{ backgroundColor: "#0D1F3C", border: "1px solid rgba(0,229,204,0.2)", top: "calc(100% + 4px)" }}
             className="absolute left-0 max-w-sm rounded-xl overflow-hidden z-10 shadow-xl max-h-56 overflow-y-auto">
-            {filtered.length === 0 ? <p className="text-gray-500 text-sm p-4 text-center">No players found</p> : filtered.map(k => (
-              <button key={k.id} onMouseDown={() => selectPlayer(k)}
-                style={k.id === selectedId ? { backgroundColor: "rgba(0,229,204,0.1)" } : {}}
-                className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/5 text-left transition-colors">
-                <span className="text-white text-sm">{k.name}</span>
-                <span style={{ backgroundColor: "rgba(0,229,204,0.1)", color: "#00E5CC" }} className="text-xs px-2 py-0.5 rounded-full">{k.age_group}</span>
-              </button>
-            ))}
+            {filtered.length === 0
+              ? <p className="text-gray-500 text-sm p-4 text-center">No players found</p>
+              : filtered.map(k => (
+                <button key={k.id} onMouseDown={() => selectPlayer(k)}
+                  style={k.id === selectedId ? { backgroundColor: "rgba(0,229,204,0.1)" } : {}}
+                  className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/5 text-left transition-colors">
+                  <span className="text-white text-sm">{k.name}</span>
+                  <span style={{ backgroundColor: "rgba(0,229,204,0.1)", color: "#00E5CC" }} className="text-xs px-2 py-0.5 rounded-full">{k.age_group}</span>
+                </button>
+              ))}
           </div>
         )}
         {selectedPlayer && (
           <div style={{ backgroundColor: "rgba(0,229,204,0.08)", border: "1px solid rgba(0,229,204,0.3)" }}
             className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm mt-2">
-            <span style={{ color: "#00E5CC" }}>✓</span>
+            <CheckCircle2 size={13} style={{ color: "#00E5CC" }} />
             <span className="text-white">{selectedPlayer.name}</span>
             <span style={{ color: "#00E5CC" }} className="text-xs">{selectedPlayer.age_group}</span>
           </div>
@@ -163,7 +171,7 @@ function PlayerAnalytics({ kids, locations }) {
 
       {loading && (
         <div className="flex items-center gap-2 text-gray-400 text-sm">
-          <div style={{ borderColor: "#00E5CC" }} className="animate-spin rounded-full h-4 w-4 border-b-2" />
+          <Loader2 size={14} style={{ color: "#00E5CC" }} className="animate-spin" />
           Loading...
         </div>
       )}
@@ -251,7 +259,7 @@ function PlayerAnalytics({ kids, locations }) {
 
       {!stats && !loading && (
         <div style={{ backgroundColor: "#0A1628" }} className="rounded-xl p-12 text-center">
-          <p className="text-4xl mb-3"></p>
+          <User size={32} className="mx-auto mb-3 text-gray-600" />
           <p className="text-gray-500 text-sm">Select a player above to view their analytics</p>
         </div>
       )}
@@ -276,7 +284,7 @@ function CoachAnalytics({ coaches }) {
 
   return (
     <div>
-      <SectionHeader icon="🧑‍🏫" title="Coach Analytics"
+      <SectionHeader icon={GraduationCap} title="Coach Analytics"
         subtitle="Evaluate coach performance, session delivery, and player engagement" />
       <div className="mb-6">
         <select style={{ ...input, backgroundImage: "none" }}
@@ -292,7 +300,7 @@ function CoachAnalytics({ coaches }) {
 
       {loading && (
         <div className="flex items-center gap-2 text-gray-400 text-sm">
-          <div style={{ borderColor: "#00E5CC" }} className="animate-spin rounded-full h-4 w-4 border-b-2" />
+          <Loader2 size={14} style={{ color: "#00E5CC" }} className="animate-spin" />
           Loading...
         </div>
       )}
@@ -369,7 +377,7 @@ function CoachAnalytics({ coaches }) {
 
       {!stats && !loading && (
         <div style={{ backgroundColor: "#0A1628" }} className="rounded-xl p-12 text-center">
-          <p className="text-4xl mb-3"></p>
+          <GraduationCap size={32} className="mx-auto mb-3 text-gray-600" />
           <p className="text-gray-500 text-sm">Select a coach above to view their analytics</p>
         </div>
       )}
@@ -394,19 +402,19 @@ function LocationAnalytics() {
 
   return (
     <div>
-      <SectionHeader icon="📍" title="Location Analytics"
+      <SectionHeader icon={MapPin} title="Location Analytics"
         subtitle="Compare venue utilization, session frequency, and age group distribution" />
 
       {loading && (
         <div className="flex items-center gap-2 text-gray-400 text-sm mb-6">
-          <div style={{ borderColor: "#00E5CC" }} className="animate-spin rounded-full h-4 w-4 border-b-2" />
+          <Loader2 size={14} style={{ color: "#00E5CC" }} className="animate-spin" />
           Loading locations...
         </div>
       )}
 
       {!loading && locations.length === 0 && (
         <div style={{ backgroundColor: "#0A1628" }} className="rounded-xl p-12 text-center">
-          <p className="text-4xl mb-3">📍</p>
+          <MapPin size={32} className="mx-auto mb-3 text-gray-600" />
           <p className="text-gray-500 text-sm">No location data found. Add a location field to your sessions.</p>
         </div>
       )}
@@ -498,9 +506,18 @@ function CrossCuttingMetrics() {
     getRetentionAnalytics().then(r => setRetention(r.data)).catch(() => {});
   }, []);
 
+  const metricsRef = [
+    { icon: TrendingUp,    metric: "Attendance Rate",       target: "≥ 80%",  color: "#00E5CC", desc: "Sessions attended vs scheduled" },
+    { icon: CheckCircle2,  metric: "Session Consistency",   target: "≥ 85%",  color: "#00E5CC", desc: "Sessions held vs scheduled" },
+    { icon: GraduationCap, metric: "Coach Completion Rate", target: "≥ 90%",  color: "#00E5CC", desc: "Completed sessions per coach" },
+    { icon: MapPin,        metric: "Location Utilization",  target: "≥ 75%",  color: "#FCD34D", desc: "Completed vs total at venue" },
+    { icon: RefreshCw,     metric: "Age Group Retention",   target: "≥ 70%",  color: "#00E5CC", desc: "Players staying active" },
+    { icon: Timer,         metric: "Punctuality Rate",      target: "≥ 90%",  color: "#FCD34D", desc: "Present vs present + late" },
+  ];
+
   return (
     <div>
-      <SectionHeader icon="🔁" title="Academy Overview"
+      <SectionHeader icon={RefreshCw} title="Academy Overview"
         subtitle="Academy-wide trends spanning players, coaches, and locations" />
 
       {retention && (
@@ -548,23 +565,16 @@ function CrossCuttingMetrics() {
           <div style={{ backgroundColor: "#0A1628", border: "1px solid rgba(255,255,255,0.06)" }} className="rounded-xl p-5">
             <p className="text-xs text-gray-400 uppercase tracking-wider mb-4">Metrics Quick Reference</p>
             <div className="space-y-3">
-              {[
-                { icon: "📊", metric: "Attendance Rate", target: "≥ 80%", color: "#00E5CC", desc: "Sessions attended vs scheduled" },
-                { icon: "✅", metric: "Session Consistency", target: "≥ 85%", color: "#00E5CC", desc: "Sessions held vs scheduled" },
-                { icon: "🧑‍🏫", metric: "Coach Completion Rate", target: "≥ 90%", color: "#00E5CC", desc: "Completed sessions per coach" },
-                { icon: "📍", metric: "Location Utilization", target: "≥ 75%", color: "#FCD34D", desc: "Completed vs total at venue" },
-                { icon: "🔁", metric: "Age Group Retention", target: "≥ 70%", color: "#00E5CC", desc: "Players staying active" },
-                { icon: "⏰", metric: "Punctuality Rate", target: "≥ 90%", color: "#FCD34D", desc: "Present vs present + late" },
-              ].map(item => (
-                <div key={item.metric} className="flex items-start gap-3">
-                  <span className="text-lg mt-0.5">{item.icon}</span>
+              {metricsRef.map(({ icon: Icon, metric, target, color, desc }) => (
+                <div key={metric} className="flex items-start gap-3">
+                  <Icon size={16} style={{ color }} className="mt-0.5 shrink-0" strokeWidth={1.75} />
                   <div className="flex-1">
                     <div className="flex justify-between items-center">
-                      <span className="text-white text-sm font-medium">{item.metric}</span>
-                      <span style={{ color: item.color, backgroundColor: `${item.color}15` }}
-                        className="text-xs px-2 py-0.5 rounded-full font-semibold">{item.target}</span>
+                      <span className="text-white text-sm font-medium">{metric}</span>
+                      <span style={{ color, backgroundColor: `${color}15` }}
+                        className="text-xs px-2 py-0.5 rounded-full font-semibold">{target}</span>
                     </div>
-                    <p className="text-gray-500 text-xs mt-0.5">{item.desc}</p>
+                    <p className="text-gray-500 text-xs mt-0.5">{desc}</p>
                   </div>
                 </div>
               ))}
@@ -575,7 +585,7 @@ function CrossCuttingMetrics() {
 
       {!retention && (
         <div style={{ backgroundColor: "#0A1628" }} className="rounded-xl p-12 text-center">
-          <div style={{ borderColor: "#00E5CC" }} className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto mb-3" />
+          <Loader2 size={28} style={{ color: "#00E5CC" }} className="animate-spin mx-auto mb-3" />
           <p className="text-gray-500 text-sm">Loading academy overview...</p>
         </div>
       )}
@@ -584,10 +594,10 @@ function CrossCuttingMetrics() {
 }
 
 const TABS = [
-  { id: "player", label: "Player", icon: "👦" },
-  { id: "coach", label: "Coach", icon: "🧑‍🏫" },
-  { id: "location", label: "Location", icon: "📍" },
-  { id: "cross", label: "Academy Overview", icon: "🔁" },
+  { id: "player",   label: "Player",           icon: User },
+  { id: "coach",    label: "Coach",            icon: GraduationCap },
+  { id: "location", label: "Location",         icon: MapPin },
+  { id: "cross",    label: "Academy Overview", icon: LayoutGrid },
 ];
 
 export default function Analytics() {
@@ -611,23 +621,23 @@ export default function Analytics() {
 
       <div style={{ backgroundColor: "#0A1628", border: "1px solid rgba(255,255,255,0.06)" }}
         className="flex rounded-xl p-1 mb-8 w-fit gap-1">
-        {TABS.map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)}
-            style={tab === t.id
+        {TABS.map(({ id, label, icon: Icon }) => (
+          <button key={id} onClick={() => setTab(id)}
+            style={tab === id
               ? { backgroundColor: "#00E5CC", color: "#0A1628" }
               : { color: "#9CA3AF" }}
             className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all">
-            <span>{t.icon}</span>
-            {t.label}
+            <Icon size={14} strokeWidth={1.75} />
+            {label}
           </button>
         ))}
       </div>
 
       <div style={card} className="rounded-2xl p-8">
-        {tab === "player" && <PlayerAnalytics kids={kids} locations={locations} />}
-        {tab === "coach" && <CoachAnalytics coaches={coaches} />}
+        {tab === "player"   && <PlayerAnalytics kids={kids} locations={locations} />}
+        {tab === "coach"    && <CoachAnalytics coaches={coaches} />}
         {tab === "location" && <LocationAnalytics />}
-        {tab === "cross" && <CrossCuttingMetrics />}
+        {tab === "cross"    && <CrossCuttingMetrics />}
       </div>
     </div>
   );
