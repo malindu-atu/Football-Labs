@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ClipboardCheck, ChevronLeft, UserPlus, Check, X, Clock, MapPin } from 'lucide-react';
 import { getKids, markAttendance, getSessionAttendance } from "../api";
 import { useAuth } from "../context/AuthContext";
 import { pageWrapper, card, input, btnPrimary, btnOutline } from "../components/UI";
@@ -176,9 +177,9 @@ export default function Attendance() {
                       className="text-xs px-2 py-0.5 rounded-full capitalize">{s.status}</span>
                   </div>
                   <p className="text-white font-semibold mb-1">{formatDay(s.date)}</p>
-                  <p className="text-gray-400 text-sm">⏰ {s.start_time} – {s.end_time}</p>
-                  <p className="text-gray-400 text-sm mt-1">🧑‍🏫 {s.coaches?.name || "No coach"}</p>
-                  <p className="text-gray-500 text-xs mt-1">👦 {enrolledCount} enrolled students</p>
+                  <p className="text-gray-400 text-sm">{s.start_time} – {s.end_time}</p>
+                  <p className="text-gray-400 text-sm mt-1">{s.coaches?.name || "No coach"}</p>
+                  <p className="text-gray-500 text-xs mt-1">{enrolledCount} enrolled students</p>
                   <div style={{ color: "#00E5CC" }} className="text-xs mt-3 opacity-0 group-hover:opacity-60 transition-all">
                     {isCompleted ? "View / edit attendance →" : "Mark attendance →"}
                   </div>
@@ -360,7 +361,7 @@ export default function Attendance() {
           ) : (
             <button onClick={handleSubmit} disabled={submitting} style={btnPrimary}
               className="px-8 py-2.5 rounded-lg font-bold text-sm hover:opacity-90 disabled:opacity-50 transition-all">
-              {submitting ? "Submitting…" : "Submit Attendance ✓"}
+              {submitting ? "Submitting…" : "Submit Attendance"}
             </button>
           )}
         </div>

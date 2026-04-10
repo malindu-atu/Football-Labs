@@ -251,7 +251,7 @@ function PlayerAnalytics({ kids, locations }) {
 
       {!stats && !loading && (
         <div style={{ backgroundColor: "#0A1628" }} className="rounded-xl p-12 text-center">
-          <p className="text-4xl mb-3">📊</p>
+          <p className="text-4xl mb-3"></p>
           <p className="text-gray-500 text-sm">Select a player above to view their analytics</p>
         </div>
       )}
@@ -369,7 +369,7 @@ function CoachAnalytics({ coaches }) {
 
       {!stats && !loading && (
         <div style={{ backgroundColor: "#0A1628" }} className="rounded-xl p-12 text-center">
-          <p className="text-4xl mb-3">📈</p>
+          <p className="text-4xl mb-3"></p>
           <p className="text-gray-500 text-sm">Select a coach above to view their analytics</p>
         </div>
       )}

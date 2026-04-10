@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { CreditCard, ChevronLeft, ChevronRight, CheckCircle, XCircle, MinusCircle, Edit3 } from 'lucide-react';
 import { getKids, getPayments, getPaymentSummary, upsertPayment } from "../api";
 import { pageWrapper, card, input, btnPrimary } from "../components/UI";
 import StudentFilter from "../components/StudentFilter";
@@ -319,13 +320,13 @@ export default function Payments() {
                   <div className="flex-1 min-w-0">
                     <p className="text-white font-medium text-sm truncate">{k.name}</p>
                     <p className="text-gray-500 text-xs">{k.age_group}{p?.amount ? ` · LKR ${p.amount.toLocaleString()}` : ""}</p>
-                    {p?.note && <p className="text-gray-600 text-xs truncate">📝 {p.note}</p>}
+                    {p?.note && <p className="text-gray-600 text-xs truncate">{p.note}</p>}
                   </div>
                   <div className="flex items-center gap-2">
                     <StatusPill status={status} saving={saving[k.id]} onClick={() => cycleStatus(k)} />
                     <button onClick={() => setModalKid(k)}
                       style={{ color: "#9CA3AF" }} className="text-lg hover:text-white transition-colors" title="Edit details">
-                      ✎
+                      
                     </button>
                   </div>
                 </div>

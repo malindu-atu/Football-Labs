@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getCoaches, createCoach, deleteCoach } from "../api";
-import { pageWrapper, card, input, btnPrimary } from "../components/UI";
+import { pageWrapper, card, input, btnPrimary, btnOutline } from "../components/UI";
+import { UserPlus, Trash2, Phone, Mail, Users, X, Plus, ChevronDown } from "lucide-react";
 
 const AGE_GROUPS = ["U6","U7","U8","U9","U10","U11","U12","U13","U14","U15","U16"];
 
@@ -36,150 +37,124 @@ export default function Coaches() {
   };
 
   return (
-    <div style={pageWrapper} className="p-4 sm:p-6 lg:p-8">
-      <div className="mb-6 sm:mb-8 flex items-start justify-between gap-4">
+    <div style={pageWrapper} className="p-5 sm:p-7 lg:p-9">
+
+      {/* Header */}
+      <div className="mb-7 flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">Coaches</h1>
-          <p className="text-gray-400 mt-1 text-sm">Manage your academy coaching staff</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Coaches</h1>
+          <p className="text-gray-500 mt-1 text-sm">Manage your academy coaching staff</p>
         </div>
-        <button
-          onClick={() => setShowForm(f => !f)}
-          style={btnPrimary}
-          className="px-4 py-2 rounded-lg font-semibold text-sm hover:opacity-90 transition-all whitespace-nowrap flex-shrink-0"
-        >
-          {showForm ? "✕ Cancel" : "+ Add Coach"}
+        <button onClick={() => setShowForm(f => !f)}
+          style={showForm ? btnOutline : btnPrimary}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition-all">
+          {showForm ? <><X size={15} /> Cancel</> : <><UserPlus size={15} /> Add Coach</>}
         </button>
       </div>
 
-      {/* Add Coach Form */}
+      {/* Add form */}
       {showForm && (
-        <div style={card} className="rounded-2xl p-4 sm:p-6 mb-6">
-          <h2 className="font-semibold text-white mb-4">Add New Coach</h2>
+        <div style={card} className="rounded-2xl p-5 mb-6">
+          <h2 className="font-semibold text-white mb-4 flex items-center gap-2">
+            <UserPlus size={16} style={{ color: "#00E5CC" }} /> New Coach
+          </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
-                { placeholder: "Full Name", key: "name" },
-                { placeholder: "Email", key: "email", type: "email" },
-                { placeholder: "Phone", key: "phone" }
-              ].map(f => (
-                <input key={f.key}
-                  style={input}
-                  className="rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30"
-                  placeholder={f.placeholder}
-                  type={f.type || "text"}
-                  value={form[f.key]}
-                  onChange={e => setForm({...form, [f.key]: e.target.value})}
-                  required={f.key !== "phone"} />
+                { placeholder: "Full name", key: "name", icon: Users },
+                { placeholder: "Email address", key: "email", type: "email", icon: Mail },
+                { placeholder: "Phone number", key: "phone", icon: Phone },
+              ].map(({ placeholder, key, type, icon: Icon }) => (
+                <div key={key} className="relative">
+                  <Icon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                  <input style={input}
+                    className="w-full rounded-xl pl-9 pr-3 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-cyan-500/40"
+                    placeholder={placeholder} type={type || "text"}
+                    value={form[key]} onChange={e => setForm({...form, [key]: e.target.value})}
+                    required={key !== "phone"} />
+                </div>
               ))}
             </div>
             <div>
-              <p className="text-sm text-gray-400 mb-2">Age Groups</p>
+              <p className="text-xs text-gray-500 mb-2 font-medium">Age Groups</p>
               <div className="flex flex-wrap gap-2">
                 {AGE_GROUPS.map(g => (
                   <button type="button" key={g} onClick={() => toggleGroup(g)}
                     style={form.age_groups.includes(g)
-                      ? { backgroundColor: "#00E5CC", color: "#0A1628", border: "1px solid #00E5CC" }
-                      : { backgroundColor: "transparent", color: "#9CA3AF", border: "1px solid rgba(255,255,255,0.1)" }}
-                    className="px-3 py-1 rounded-full text-sm transition-all hover:border-cyan-500/50">
+                      ? { backgroundColor: "#00E5CC", color: "#080F1E", border: "1px solid #00E5CC" }
+                      : { backgroundColor: "transparent", color: "#6B7280", border: "1px solid rgba(255,255,255,0.08)" }}
+                    className="px-3 py-1 rounded-lg text-xs font-semibold transition-all hover:border-cyan-500/40">
                     {g}
                   </button>
                 ))}
               </div>
             </div>
             <button style={btnPrimary}
-              className="px-6 py-2.5 rounded-lg font-semibold text-sm hover:opacity-90 transition-all"
-              type="submit">
-              + Add Coach
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 transition-all">
+              <Plus size={15} /> Add Coach
             </button>
           </form>
         </div>
       )}
 
-      {/* Coaches List */}
+      {/* Coaches list */}
       <div style={card} className="rounded-2xl overflow-hidden">
-        <div className="p-4 border-b border-white/5">
-          <h2 className="font-semibold text-white">All Coaches ({coaches.length})</h2>
+        <div className="p-4 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+          <p className="font-semibold text-white text-sm">All Coaches</p>
+          <span style={{ backgroundColor: "rgba(0,229,204,0.1)", color: "#00E5CC" }}
+            className="text-xs px-2.5 py-0.5 rounded-full font-semibold">{coaches.length}</span>
         </div>
 
-        {/* Mobile cards */}
-        <div className="block sm:hidden">
-          {loading && <p className="p-6 text-center text-gray-500 text-sm">Loading coaches...</p>}
+        {loading && <p className="p-8 text-center text-gray-600 text-sm">Loading…</p>}
+
+        <div className="divide-y divide-white/5">
           {coaches.map(c => (
-            <div key={c.id} style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }} className="p-4">
-              <div className="flex items-center justify-between gap-3 mb-2">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div style={{ backgroundColor: "#00E5CC", color: "#0A1628" }}
-                    className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
-                    {c.name.charAt(0)}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-white font-medium text-sm truncate">{c.name}</p>
-                    <p className="text-gray-400 text-xs truncate">{c.email}</p>
-                  </div>
-                </div>
-                <button onClick={() => handleDelete(c.id)}
-                  style={{ color: "#F87171", border: "1px solid rgba(248,113,113,0.2)" }}
-                  className="px-3 py-1 rounded-lg text-xs hover:bg-red-500/10 transition-all flex-shrink-0">
-                  Remove
-                </button>
+            <div key={c.id} className="flex items-center gap-4 p-4 hover:bg-white/2 transition-colors group">
+              {/* Avatar */}
+              <div style={{ background: "linear-gradient(135deg, #00E5CC22, #00E5CC11)", border: "1px solid rgba(0,229,204,0.2)", color: "#00E5CC" }}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0">
+                {c.name.charAt(0)}
               </div>
-              <div className="ml-12">
-                {c.phone && <p className="text-gray-400 text-xs mb-2">📞 {c.phone}</p>}
-                <div className="flex flex-wrap gap-1">
-                  {c.age_groups?.map(g => (
-                    <span key={g} style={{ backgroundColor: "rgba(0,229,204,0.1)", color: "#00E5CC" }}
-                      className="px-2 py-0.5 rounded-full text-xs">{g}</span>
-                  ))}
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-semibold text-sm">{c.name}</p>
+                <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                  <span className="flex items-center gap-1 text-gray-500 text-xs">
+                    <Mail size={11} /> {c.email}
+                  </span>
+                  {c.phone && (
+                    <span className="flex items-center gap-1 text-gray-500 text-xs">
+                      <Phone size={11} /> {c.phone}
+                    </span>
+                  )}
                 </div>
               </div>
+              {/* Age groups */}
+              <div className="hidden sm:flex flex-wrap gap-1 max-w-xs justify-end">
+                {c.age_groups?.map(g => (
+                  <span key={g} style={{ backgroundColor: "rgba(0,229,204,0.08)", color: "#00E5CC", border: "1px solid rgba(0,229,204,0.15)" }}
+                    className="px-2 py-0.5 rounded-lg text-xs font-medium">{g}</span>
+                ))}
+              </div>
+              {/* Delete */}
+              <button onClick={() => handleDelete(c.id)}
+                className="opacity-0 group-hover:opacity-100 transition-all flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs"
+                style={{ color: "#F87171", border: "1px solid rgba(248,113,113,0.2)" }}>
+                <Trash2 size={12} /> Remove
+              </button>
             </div>
           ))}
         </div>
 
-        {/* Desktop table */}
-        <div className="hidden sm:block overflow-x-auto">
-          <table className="w-full">
-            <thead style={{ backgroundColor: "#0A1628" }}>
-              <tr>{["Name","Email","Phone","Age Groups","Action"].map(h => (
-                <th key={h} className="p-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">{h}</th>
-              ))}</tr>
-            </thead>
-            <tbody>
-              {loading && <tr><td colSpan={5} className="p-8 text-center text-gray-500">Loading coaches...</td></tr>}
-              {coaches.map(c => (
-                <tr key={c.id} style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
-                  className="hover:bg-white/2 transition-colors">
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div style={{ backgroundColor: "#00E5CC", color: "#0A1628" }}
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
-                        {c.name.charAt(0)}
-                      </div>
-                      <span className="text-white font-medium">{c.name}</span>
-                    </div>
-                  </td>
-                  <td className="p-4 text-gray-400 text-sm">{c.email}</td>
-                  <td className="p-4 text-gray-400 text-sm">{c.phone || "—"}</td>
-                  <td className="p-4">
-                    <div className="flex flex-wrap gap-1">
-                      {c.age_groups?.map(g => (
-                        <span key={g} style={{ backgroundColor: "rgba(0,229,204,0.1)", color: "#00E5CC" }}
-                          className="px-2 py-0.5 rounded-full text-xs">{g}</span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <button onClick={() => handleDelete(c.id)}
-                      style={{ color: "#F87171", border: "1px solid rgba(248,113,113,0.2)" }}
-                      className="px-3 py-1 rounded-lg text-xs hover:bg-red-500/10 transition-all">
-                      Remove
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {!loading && coaches.length === 0 && (
+          <div className="p-12 text-center">
+            <div style={{ backgroundColor: "rgba(0,229,204,0.08)", color: "#00E5CC" }}
+              className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3">
+              <Users size={22} />
+            </div>
+            <p className="text-gray-500 text-sm">No coaches yet. Add your first coach above.</p>
+          </div>
+        )}
       </div>
     </div>
   );

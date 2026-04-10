@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { MapPin, Plus, Trash2, UserCheck, Users, ChevronRight, Clock, Calendar } from 'lucide-react';
 import { getCoaches, getKids } from "../api";
 import { pageWrapper, card, input, btnPrimary, btnOutline } from "../components/UI";
 import axios from "axios";
@@ -53,12 +54,12 @@ function SessionRow({ t, coaches, onAssignCoach, onDelete, onManageStudents }) {
           <button onClick={() => onManageStudents(t)}
             style={{ color: "#9CA3AF", border: "1px solid rgba(255,255,255,0.08)" }}
             className="px-2 py-1 rounded-lg text-xs hover:text-white hover:border-white/20 transition-all">
-            👦 Students
+            Students
           </button>
           <button onClick={() => setEditing(e => !e)}
             style={{ color: "#9CA3AF", border: "1px solid rgba(255,255,255,0.08)" }}
             className="px-2 py-1 rounded-lg text-xs hover:text-white hover:border-white/20 transition-all">
-            🧑‍🏫 {t.coaches?.name || "Assign Coach"}
+            {t.coaches?.name || "Assign Coach"}
           </button>
           <button onClick={() => onDelete(t.id)}
             style={{ color: "#F87171" }}
@@ -163,8 +164,8 @@ function LocationTile({ loc, coaches, allKids, onRefresh, onDelete }) {
                 <p className="text-white text-lg font-bold">{totalStudents}</p>
                 <p className="text-gray-500 text-xs">students</p>
               </div>
-              <span style={{ color: expanded ? "#00E5CC" : "#6B7280" }}
-                className="text-lg transition-transform" style={{ transform: expanded ? "rotate(180deg)" : "none", color: "#6B7280" }}>
+              <span style={{ color: expanded ? "#00E5CC" : "#6B7280", transform: expanded ? "rotate(180deg)" : "none", display: "inline-block" }}
+                className="text-lg transition-transform">
                 ›
               </span>
             </div>
@@ -268,7 +269,7 @@ function LocationTile({ loc, coaches, allKids, onRefresh, onDelete }) {
               <button onClick={() => onDelete(loc.id)}
                 style={{ color: "#F87171", border: "1px solid rgba(248,113,113,0.2)" }}
                 className="px-3 py-1.5 rounded-lg text-xs hover:bg-red-500/10 transition-all">
-                🗑 Remove Location
+                Remove Location
               </button>
             </div>
           </div>
@@ -372,7 +373,7 @@ export default function Sessions() {
         </div>
         <button onClick={() => setShowAddLocation(f => !f)} style={btnPrimary}
           className="px-4 py-2 rounded-lg font-semibold text-sm hover:opacity-90 transition-all whitespace-nowrap">
-          {showAddLocation ? "✕ Cancel" : "+ Add Location"}
+          {showAddLocation ? "Cancel" : "Add Location"}
         </button>
       </div>
 

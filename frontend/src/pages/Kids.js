@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { UserPlus, ScanLine, ArrowLeft, Calendar, User, Phone, Users } from 'lucide-react';
 import { getKids, createKid } from "../api";
 import { pageWrapper, card, input, btnPrimary, btnOutline } from "../components/UI";
 import StudentFilter from "../components/StudentFilter";
@@ -49,7 +50,7 @@ function EnrollmentScanner({ onExtracted, onSkip }) {
     <div style={card} className="rounded-2xl p-6 mb-6">
       <div className="flex items-center gap-3 mb-5">
         <div style={{ backgroundColor: "rgba(0,229,204,0.15)", color: "#00E5CC" }}
-          className="w-10 h-10 rounded-xl flex items-center justify-center text-lg">📄</div>
+          className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"></div>
         <div>
           <h2 className="font-semibold text-white text-base">Upload Enrollment Document</h2>
           <p className="text-gray-400 text-xs mt-0.5">AI will auto-fill student details from the document</p>
@@ -64,7 +65,7 @@ function EnrollmentScanner({ onExtracted, onSkip }) {
           <img src={preview} alt="preview" className="max-h-52 rounded-lg object-contain border border-white/10" />
         ) : (
           <>
-            <div style={{ color: "#00E5CC" }} className="text-4xl">🖼️</div>
+            <div style={{ color: "#00E5CC" }} className="text-4xl"></div>
             <p className="text-gray-300 text-sm font-medium">Drop document image here or click to browse</p>
             <p className="text-gray-500 text-xs">JPG, PNG, WEBP supported</p>
           </>
@@ -75,7 +76,7 @@ function EnrollmentScanner({ onExtracted, onSkip }) {
         <button onClick={handleScan} disabled={!file || scanning}
           style={file && !scanning ? btnPrimary : { backgroundColor: "rgba(0,229,204,0.3)", color: "#0A1628" }}
           className="flex-1 py-3 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2">
-          {scanning ? <><span className="animate-spin">⟳</span> Scanning…</> : "🔍 Scan & Auto-fill"}
+          {scanning ? <><span className="animate-spin">⟳</span> Scanning…</> : "Scan & Auto-fill"}
         </button>
         <button onClick={onSkip} style={btnOutline} className="px-5 py-3 rounded-lg font-semibold text-sm transition-all">Skip</button>
       </div>
@@ -212,8 +213,8 @@ export default function Kids() {
                 <span style={{ backgroundColor: "rgba(0,229,204,0.1)", color: "#00E5CC" }} className="px-2 py-0.5 rounded-full text-xs flex-shrink-0">{k.age_group}</span>
               </div>
               <div className="ml-12 grid grid-cols-2 gap-1 text-xs text-gray-400">
-                <span>👤 {k.parent_name || "—"}</span>
-                <span>📞 {k.parent_contact || "—"}</span>
+                <span>{k.parent_name || "—"}</span>
+                <span>{k.parent_contact || "—"}</span>
                 {k.enrollment_date && <span className="col-span-2">📅 {k.enrollment_date}</span>}
               </div>
             </div>
