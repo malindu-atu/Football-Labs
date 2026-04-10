@@ -2,7 +2,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   LayoutDashboard, Users, CalendarDays, GraduationCap,
-  ClipboardCheck, CreditCard, BarChart3, UserCog, LogOut, Footprints
+  ClipboardCheck, CreditCard, BarChart3, LogOut, Footprints
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -13,7 +13,6 @@ const NAV_ITEMS = [
   { to: "/attendance",label: "Attendance",icon: ClipboardCheck  },
   { to: "/payments",  label: "Payments",  icon: CreditCard      },
   { to: "/analytics", label: "Analytics", icon: BarChart3       },
-  { to: "/users",     label: "Users",     icon: UserCog         },
 ];
 
 const COACH_ITEMS = [
