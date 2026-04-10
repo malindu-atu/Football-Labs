@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Query
 from pydantic import BaseModel
 from app.database import supabase
 from app.config import settings
@@ -26,8 +26,23 @@ class ExtractedStudentData(BaseModel):
     enrollment_date: Optional[str] = None
 
 @router.get("/")
-def get_kids():
-    res = supabase.table("kids").select("*").eq("is_active", True).execute()
+def get_kids(age_group: Optional[str] = Query(None), location_id: Optional[str] = Query(None)):
+    if location_id:
+        # Get kid IDs enrolled in any session template at this location
+        enrollments = supabase.table("session_enrollments") \
+            .select("kid_id, session_templates!inner(location_id)") \
+            .eq("session_templates.location_id", location_id).execute()
+        kid_ids = list({e["kid_id"] for e in enrollments.data})
+        if not kid_ids:
+            return []
+        query = supabase.table("kids").select("*").eq("is_active", True).in_("id", kid_ids)
+    else:
+        query = supabase.table("kids").select("*").eq("is_active", True)
+
+    if age_group:
+        query = query.eq("age_group", age_group)
+
+    res = query.execute()
     return res.data
 
 @router.get("/age-group/{age_group}")
@@ -80,14 +95,9 @@ Rules:
                             "content": [
                                 {
                                     "type": "image_url",
-                                    "image_url": {
-                                        "url": f"data:{content_type};base64,{image_b64}"
-                                    },
+                                    "image_url": {"url": f"data:{content_type};base64,{image_b64}"},
                                 },
-                                {
-                                    "type": "text",
-                                    "text": prompt,
-                                },
+                                {"type": "text", "text": prompt},
                             ],
                         }
                     ],
