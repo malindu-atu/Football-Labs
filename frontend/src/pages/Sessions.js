@@ -146,10 +146,10 @@ function LocationTile({ loc, coaches, allKids, onRefresh, onDelete }) {
         <div className="p-5" onClick={() => setExpanded(e => !e)}>
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div style={{ backgroundColor: "rgba(0,229,204,0.15)", color: "#00E5CC" }}
-                className="w-11 h-11 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
-                📍
-              </div>
+            <div style={{ backgroundColor: "rgba(0,229,204,0.15)", color: "#00E5CC" }}
+  className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0">
+  <MapPin size={22} strokeWidth={1.8} />
+</div>
               <div>
                 <h3 className="text-white font-semibold text-base">{loc.name}</h3>
                 {loc.address && <p className="text-gray-500 text-xs mt-0.5">{loc.address}</p>}
