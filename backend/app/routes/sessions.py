@@ -114,3 +114,58 @@ def get_sessions():
 def get_unassigned_sessions():
     res = supabase.table("sessions").select("*, locations(*)").is_("coach_id", "null").execute()
     return res.data
+
+@router.get("/history")
+def get_session_history():
+    """
+    Returns all past sessions with attendance counts,
+    grouped by location and month for the history view.
+    """
+    res = supabase.table("sessions").select(
+        "*, coaches(*), locations(*), session_templates(*, session_enrollments(kid_id))"
+    ).order("date", desc=True).execute()
+
+    sessions = res.data
+
+    # Fetch attendance counts per session in one query
+    att_res = supabase.table("attendance").select("session_id, status").execute()
+    att_map = {}  # session_id → {present, absent, late, total}
+    for a in att_res.data:
+        sid = a["session_id"]
+        if sid not in att_map:
+            att_map[sid] = {"present": 0, "absent": 0, "late": 0, "total": 0}
+        att_map[sid][a["status"]] = att_map[sid].get(a["status"], 0) + 1
+        att_map[sid]["total"] += 1
+
+    # Attach attendance counts to sessions
+    for s in sessions:
+        s["attendance_counts"] = att_map.get(s["id"], {"present": 0, "absent": 0, "late": 0, "total": 0})
+
+    # Group by location → month → sessions
+    from collections import defaultdict
+    grouped = defaultdict(lambda: defaultdict(list))
+
+    for s in sessions:
+        loc_id = s.get("location_id") or "unknown"
+        loc_name = s.get("locations", {}).get("name", "Unknown Location") if s.get("locations") else "Unknown"
+        loc_address = s.get("locations", {}).get("address", "") if s.get("locations") else ""
+        date = s.get("date", "")
+        month = date[:7] if date else "unknown"  # YYYY-MM
+
+        grouped[loc_id]["_meta"] = {"id": loc_id, "name": loc_name, "address": loc_address}
+        grouped[loc_id][month].append(s)
+
+    # Convert to list structure
+    result = []
+    for loc_id, data in grouped.items():
+        meta = data.pop("_meta", {"id": loc_id, "name": "Unknown", "address": ""})
+        months = []
+        for month, month_sessions in sorted(data.items(), reverse=True):
+            months.append({
+                "month": month,
+                "sessions": sorted(month_sessions, key=lambda x: x.get("date", ""), reverse=True)
+            })
+        result.append({**meta, "months": months})
+
+    result.sort(key=lambda x: x["name"])
+    return result
